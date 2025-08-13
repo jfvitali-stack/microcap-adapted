@@ -20,5 +20,33 @@
     "ARQ": "286.01",
     "UPXI": "133.11"
   },
-  "actions": null
+  "actions": null,
+  "daily_changes": {
+    "individual": {
+      "GEVO": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "FEIM": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "ARQ": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "UPXI": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      }
+    },
+    "portfolio": {
+      "total_change": -2.2737367544323206e-13,
+      "total_change_pct": -1.713777194048812e-14
+    }
+  }
 }

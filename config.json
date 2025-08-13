@@ -20,12 +20,5 @@
   "initial_cash": 0,
   "start_date": "2025-08-09",
   "report_timezone": "America/Argentina/Buenos_Aires",
-  "use_adjusted_close": false,
-  "challenge_params": {
-    "start_date": "2025-08-08",
-    "end_date": "2025-09-09",
-    "initial_value": 995.74,
-    "target_return_min": 300,
-    "target_return_max": 500
-  }
+  "use_adjusted_close": false
 }

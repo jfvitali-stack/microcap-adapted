@@ -1,0 +1,24 @@
+{
+  "date": "2025-08-12",
+  "cash": "0.00",
+  "total_value": "1287.53",
+  "prices": {
+    "GEVO": 1.99,
+    "FEIM": 31.29,
+    "ARQ": 7.2,
+    "UPXI": 6.66
+  },
+  "quantities": {
+    "GEVO": 299,
+    "FEIM": 10,
+    "ARQ": 37,
+    "UPXI": 17
+  },
+  "values": {
+    "GEVO": "595.01",
+    "FEIM": "312.90",
+    "ARQ": "266.40",
+    "UPXI": "113.22"
+  },
+  "actions": null
+}

@@ -1,5 +1,5 @@
 {
-  "cash": 0,
+  "cash": 0.0,
   "holdings": {
     "GEVO": 299,
     "FEIM": 10,
@@ -15,8 +15,8 @@
   },
   "stop_losses": {
     "GEVO": 0.95,
-    "FEIM": 26.50,
-    "ARQ": 5.80,
+    "FEIM": 26.5,
+    "ARQ": 5.8,
     "UPXI": 4.75
   },
   "target_allocations": {

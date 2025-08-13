@@ -162,6 +162,44 @@
             height: 100%;
             transition: width 0.3s ease;
         }
+
+        .daily-performance {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .daily-performance h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .perf-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .perf-item .symbol {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.1em;
+        }
+
+        .perf-item .change {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -194,11 +232,37 @@
             </div>
             <div class="stat-card">
                 <h3>Daily Change</h3>
-                <div class="value" id="daily-change">0.00%</div>
+                <div class="value" id="daily-change">Loading...</div>
             </div>
             <div class="stat-card">
                 <h3>Target Progress</h3>
                 <div class="value" id="target-progress">0.0%</div>
+            </div>
+        </div>
+
+        <div class="daily-performance">
+            <h3>📈 Today's Performance (Aug 13, 2025)</h3>
+            <div class="perf-grid">
+                <div class="perf-item">
+                    <div class="symbol">GEVO</div>
+                    <div class="change negative">-$0.01 (-0.5%)</div>
+                    <div>Value: -$2.99</div>
+                </div>
+                <div class="perf-item">
+                    <div class="symbol">FEIM</div>
+                    <div class="change positive">+$0.27 (+0.9%)</div>
+                    <div>Value: +$2.70</div>
+                </div>
+                <div class="perf-item">
+                    <div class="symbol">ARQ</div>
+                    <div class="change positive">+$0.53 (+7.4%)</div>
+                    <div>Value: +$19.61</div>
+                </div>
+                <div class="perf-item">
+                    <div class="symbol">UPXI</div>
+                    <div class="change positive">+$1.17 (+17.6%)</div>
+                    <div>Value: +$19.89</div>
+                </div>
             </div>
         </div>
         
@@ -211,7 +275,7 @@
                         <th>Shares</th>
                         <th>Current Price</th>
                         <th>Position Value</th>
-                        <th>P&L</th>
+                        <th>Total P&L</th>
                         <th>Allocation</th>
                         <th>Stop Loss</th>
                     </tr>
@@ -231,6 +295,17 @@
     </div>
 
     <script>
+        // Manual daily change data (until automated tracking is set up)
+        const dailyChanges = {
+            portfolio: { total_change: 39.21, total_change_pct: 3.0 },
+            individual: {
+                GEVO: { price_change: -0.01, price_change_pct: -0.5, value_change: -2.99 },
+                FEIM: { price_change: 0.27, price_change_pct: 0.9, value_change: 2.70 },
+                ARQ: { price_change: 0.53, price_change_pct: 7.4, value_change: 19.61 },
+                UPXI: { price_change: 1.17, price_change_pct: 17.6, value_change: 19.89 }
+            }
+        };
+
         async function loadPortfolioData() {
             try {
                 const response = await fetch('./latest.json');
@@ -250,6 +325,12 @@
                 const returnElement = document.getElementById('total-return');
                 returnElement.textContent = `${totalReturn.toFixed(2)}%`;
                 returnElement.className = totalReturn >= 0 ? 'value positive' : 'value negative';
+                
+                // Daily change
+                const dailyChangeElement = document.getElementById('daily-change');
+                const dailyChange = dailyChanges.portfolio.total_change_pct;
+                dailyChangeElement.textContent = `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}%`;
+                dailyChangeElement.className = dailyChange >= 0 ? 'value positive' : 'value negative';
                 
                 // Target progress (300% target)
                 const targetProgress = (totalReturn / 300) * 100;

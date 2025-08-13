@@ -30,11 +30,107 @@ def fetch_daily_close(symbol, use_adjusted=False):
     if key not in data:
         raise RuntimeError(f"Alpha Vantage error for {symbol}: {data}")
     ts = data[key]
-    # Latest trading day (sorted desc)
     latest_date = sorted(ts.keys())[-1]
     close_key = "4. close" if not use_adjusted else "5. adjusted close"
     close = float(ts[latest_date][close_key])
     return latest_date, close
+
+def check_trading_decisions():
+    """Load Claude's trading decisions"""
+    decisions_path = "trading_decisions.json"
+    
+    if not os.path.exists(decisions_path):
+        return []
+    
+    try:
+        with open(decisions_path, 'r', encoding='utf-8') as f:
+            decisions = json.load(f)
+        return decisions.get('execution_queue', [])
+    except Exception as e:
+        print(f"Error reading trading decisions: {e}")
+        return []
+
+def execute_trading_decisions(holdings, latest_prices, latest_date, cash):
+    """Execute Claude's trading decisions automatically"""
+    decisions = check_trading_decisions()
+    executed_actions = []
+    total_proceeds = 0
+    
+    if not decisions:
+        return holdings, executed_actions, cash
+    
+    print("🤖 Checking Claude's trading decisions...")
+    
+    for decision in decisions:
+        symbol = decision.get('symbol')
+        action = decision.get('action')
+        target_qty = decision.get('target_quantity', 0)
+        current_qty = holdings.get(symbol, 0)
+        
+        if symbol not in latest_prices or latest_prices[symbol] is None:
+            continue
+            
+        price = latest_prices[symbol]
+        
+        if action == "SELL_ALL":
+            if current_qty > 0:
+                proceeds = current_qty * price
+                cash += proceeds
+                total_proceeds += proceeds
+                holdings[symbol] = 0
+                executed_actions.append(f"🤖 CLAUDE SELL ALL {symbol}: {current_qty} shares @ ${price:.4f} = ${proceeds:.2f}")
+                print(f"✅ Executed: SELL ALL {symbol} - ${proceeds:.2f} proceeds")
+        
+        elif action == "SELL_PARTIAL":
+            if current_qty > target_qty:
+                sell_qty = current_qty - target_qty
+                proceeds = sell_qty * price
+                cash += proceeds
+                total_proceeds += proceeds
+                holdings[symbol] = target_qty
+                executed_actions.append(f"🤖 CLAUDE SELL {symbol}: {sell_qty} shares @ ${price:.4f} = ${proceeds:.2f}")
+                print(f"✅ Executed: SELL {sell_qty} {symbol} shares - ${proceeds:.2f} proceeds")
+        
+        elif action == "TRIM_TO":
+            if current_qty > target_qty:
+                trim_qty = current_qty - target_qty
+                proceeds = trim_qty * price
+                cash += proceeds
+                total_proceeds += proceeds
+                holdings[symbol] = target_qty
+                executed_actions.append(f"🤖 CLAUDE TRIM {symbol}: {trim_qty} shares @ ${price:.4f} = ${proceeds:.2f}")
+                print(f"✅ Executed: TRIM {symbol} to {target_qty} shares - ${proceeds:.2f} proceeds")
+        
+        elif action == "HOLD":
+            # No action needed, just log
+            print(f"📊 HOLD {symbol}: {current_qty} shares")
+    
+    # Archive executed decisions
+    if executed_actions:
+        executed_log = {
+            "execution_date": latest_date,
+            "total_proceeds": total_proceeds,
+            "executed_actions": executed_actions,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Save execution log
+        log_path = f"logs/claude_executions_{latest_date}.json"
+        os.makedirs("logs", exist_ok=True)
+        save_json(log_path, executed_log)
+        
+        # Clear execution queue
+        decisions_data = load_json("trading_decisions.json")
+        decisions_data["execution_queue"] = []
+        decisions_data["last_execution"] = latest_date
+        decisions_data["last_execution_summary"] = f"Executed {len(executed_actions)} orders, ${total_proceeds:.2f} proceeds"
+        save_json("trading_decisions.json", decisions_data)
+        
+        print(f"💰 Total proceeds from Claude's decisions: ${total_proceeds:.2f}")
+    else:
+        print("📋 No trading actions to execute")
+    
+    return holdings, executed_actions, cash
 
 def get_previous_day_data():
     """Load previous day's portfolio data for comparison"""
@@ -46,7 +142,7 @@ def get_previous_day_data():
         with open(csv_path, "r", encoding="utf-8") as f:
             rows = list(csv.DictReader(f))
             if len(rows) >= 1:
-                return rows[-1]  # Most recent row
+                return rows[-1]
     except:
         pass
     return None
@@ -56,20 +152,11 @@ def calculate_daily_changes(current_prices, current_total, previous_data, symbol
     changes = {}
     
     if not previous_data:
-        # No previous data, return zero changes
         for symbol in symbols:
-            changes[symbol] = {
-                'price_change': 0.0,
-                'price_change_pct': 0.0,
-                'value_change': 0.0
-            }
-        changes['portfolio'] = {
-            'total_change': 0.0,
-            'total_change_pct': 0.0
-        }
+            changes[symbol] = {'price_change': 0.0, 'price_change_pct': 0.0, 'value_change': 0.0}
+        changes['portfolio'] = {'total_change': 0.0, 'total_change_pct': 0.0}
         return changes
     
-    # Calculate individual stock changes
     for symbol in symbols:
         if symbol in current_prices and current_prices[symbol] is not None:
             current_price = current_prices[symbol]
@@ -81,7 +168,6 @@ def calculate_daily_changes(current_prices, current_total, previous_data, symbol
                     price_change = current_price - prev_price
                     price_change_pct = (price_change / prev_price) * 100 if prev_price != 0 else 0
                     
-                    # Calculate value change (price change * quantity)
                     qty_key = f"{symbol}_qty"
                     quantity = int(previous_data.get(qty_key, 0)) if qty_key in previous_data else 0
                     value_change = price_change * quantity
@@ -98,16 +184,11 @@ def calculate_daily_changes(current_prices, current_total, previous_data, symbol
         else:
             changes[symbol] = {'price_change': 0.0, 'price_change_pct': 0.0, 'value_change': 0.0}
     
-    # Calculate total portfolio change
     try:
         prev_total = float(previous_data.get('total_value', 0))
         total_change = current_total - prev_total
         total_change_pct = (total_change / prev_total) * 100 if prev_total != 0 else 0
-        
-        changes['portfolio'] = {
-            'total_change': total_change,
-            'total_change_pct': total_change_pct
-        }
+        changes['portfolio'] = {'total_change': total_change, 'total_change_pct': total_change_pct}
     except (ValueError, TypeError):
         changes['portfolio'] = {'total_change': 0.0, 'total_change_pct': 0.0}
     
@@ -126,12 +207,7 @@ def main():
         os.makedirs("state", exist_ok=True)
         initial_state = {
             "cash": 0,
-            "holdings": {
-                "GEVO": 299,
-                "FEIM": 10,
-                "ARQ": 37,
-                "UPXI": 17
-            },
+            "holdings": {"GEVO": 299, "FEIM": 10, "ARQ": 37, "UPXI": 17},
             "last_valuation_date": "2025-08-08"
         }
         save_json(state_path, initial_state)
@@ -143,13 +219,11 @@ def main():
     holdings = state["holdings"]
     cash = float(state["cash"])
 
-    # Get previous day data for comparison
     previous_data = get_previous_day_data()
-
     latest_prices = {}
     latest_date = None
 
-    # Rate limiting: 5 req/min free plan
+    # Fetch prices with rate limiting
     for i, sym in enumerate(symbols):
         try:
             d, px = fetch_daily_close(sym, use_adjusted=use_adj)
@@ -161,15 +235,17 @@ def main():
             latest_prices[sym] = None
             
         if i < len(symbols) - 1:
-            time.sleep(15)  # Rate limiting
+            time.sleep(15)
 
-    # Only proceed if we have a valid date
     if latest_date is None:
         print("No valid data fetched")
         sys.exit(1)
 
-    # Apply stop-loss on a closing basis
-    actions = []
+    # 🤖 EXECUTE CLAUDE'S TRADING DECISIONS FIRST
+    holdings, claude_actions, cash = execute_trading_decisions(holdings, latest_prices, latest_date, cash)
+
+    # Apply stop-loss rules
+    stop_actions = []
     for sym in symbols:
         if sym not in latest_prices or latest_prices[sym] is None:
             continue
@@ -177,10 +253,13 @@ def main():
         stop = float(stops[sym])
         if holdings.get(sym, 0) > 0 and latest_prices[sym] <= stop:
             qty = int(holdings[sym])
-            proceed = qty * latest_prices[sym]
-            cash += proceed
+            proceeds = qty * latest_prices[sym]
+            cash += proceeds
             holdings[sym] = 0
-            actions.append(f"STOP SELL {sym} {qty} @ {latest_prices[sym]:.4f}")
+            stop_actions.append(f"🛑 STOP LOSS {sym} {qty} @ {latest_prices[sym]:.4f}")
+
+    # Combine all actions
+    actions = claude_actions + stop_actions
 
     # Compute portfolio value
     position_values = {}
@@ -196,41 +275,35 @@ def main():
     # Calculate daily changes
     daily_changes = calculate_daily_changes(latest_prices, total_value, previous_data, symbols)
 
-    # CSV append
+    # Save to CSV with enhanced data
     os.makedirs("data", exist_ok=True)
     csv_path = "data/portfolio_history.csv"
     exists = os.path.exists(csv_path)
+    
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         if not exists:
-            # Enhanced header with daily change columns
             header = ["date","cash"] + [f"{s}_close" for s in symbols] + [f"{s}_qty" for s in symbols] + [f"{s}_value" for s in symbols] + ["total_value","actions"]
             header += [f"{s}_price_change" for s in symbols] + [f"{s}_price_change_pct" for s in symbols] + [f"{s}_value_change" for s in symbols]
             header += ["portfolio_change", "portfolio_change_pct"]
             w.writerow(header)
         
-        # Build row data with daily changes
         row_data = [latest_date, f"{cash:.2f}"]
         
-        # Add prices
         for s in symbols:
             if s in latest_prices and latest_prices[s] is not None:
                 row_data.append(f"{latest_prices[s]:.4f}")
             else:
                 row_data.append("")
         
-        # Add quantities
         for s in symbols:
             row_data.append(int(holdings.get(s, 0)))
         
-        # Add values
         for s in symbols:
             row_data.append(f"{position_values[s]:.2f}")
         
-        # Add totals and actions
         row_data.extend([f"{total_value:.2f}", "; ".join(actions)])
         
-        # Add daily changes
         for s in symbols:
             row_data.append(f"{daily_changes[s]['price_change']:.4f}")
         for s in symbols:
@@ -238,19 +311,18 @@ def main():
         for s in symbols:
             row_data.append(f"{daily_changes[s]['value_change']:.2f}")
         
-        # Add portfolio changes
         row_data.append(f"{daily_changes['portfolio']['total_change']:.2f}")
         row_data.append(f"{daily_changes['portfolio']['total_change_pct']:.2f}")
         
         w.writerow(row_data)
 
-    # Persist state
+    # Update state
     state["cash"] = round(cash, 2)
     state["holdings"] = holdings
     state["last_valuation_date"] = latest_date
     save_json(state_path, state)
 
-    # Create enhanced latest JSON for reporting system
+    # Enhanced JSON output
     latest_json = {
         "date": latest_date,
         "cash": f"{cash:.2f}",
@@ -262,19 +334,25 @@ def main():
         "daily_changes": {
             "individual": {sym: daily_changes[sym] for sym in symbols},
             "portfolio": daily_changes['portfolio']
-        }
+        },
+        "claude_decisions_executed": len(claude_actions) > 0
     }
     
     os.makedirs("docs", exist_ok=True)
     save_json("docs/latest.json", latest_json)
 
-    # Enhanced Report with Daily Changes
+    # Enhanced reports
     os.makedirs("reports", exist_ok=True)
     with open("reports/latest_report.md", "w", encoding="utf-8") as f:
         f.write(f"# Portfolio Report\n")
         f.write(f"**As of (latest close)**: {latest_date}\n\n")
         
-        # Portfolio Summary
+        if claude_actions:
+            f.write(f"**🤖 Claude's Trading Actions:**\n")
+            for action in claude_actions:
+                f.write(f"- {action}\n")
+            f.write(f"\n")
+        
         if previous_data:
             portfolio_change = daily_changes['portfolio']['total_change']
             portfolio_change_pct = daily_changes['portfolio']['total_change_pct']
@@ -305,7 +383,7 @@ def main():
         if actions:
             f.write(f"\n**Actions**: {', '.join(actions)}\n")
 
-    # Copy enhanced report to docs
+    # Copy to docs
     with open("docs/latest_report.md", "w", encoding="utf-8") as f:
         f.write(f"# Portfolio Report\n")
         f.write(f"**As of (latest close)**: {latest_date}\n\n")
@@ -323,11 +401,14 @@ def main():
         if actions:
             f.write(f"\n**Actions**: {', '.join(actions)}\n")
 
-    print(f"OK {latest_date} total ${total_value:.2f}")
+    print(f"✅ Portfolio updated: {latest_date} total ${total_value:.2f}")
     if previous_data:
         portfolio_change = daily_changes['portfolio']['total_change']
         portfolio_change_pct = daily_changes['portfolio']['total_change_pct']
-        print(f"Daily change: ${portfolio_change:+.2f} ({portfolio_change_pct:+.2f}%)")
+        print(f"📊 Daily change: ${portfolio_change:+.2f} ({portfolio_change_pct:+.2f}%)")
+    
+    if claude_actions:
+        print(f"🤖 Executed {len(claude_actions)} Claude trading decisions")
     
     return 0
 

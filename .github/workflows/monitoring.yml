@@ -1,0 +1,83 @@
+name: Portfolio Monitoring
+on:
+  schedule:
+    - cron: '0 12 * * *'   # Daily at noon UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas python-dateutil
+          
+      - name: Run health checks
+        id: health-check
+        run: |
+          python monitor.py > health_report.txt 2>&1
+          echo "health_status=success" >> $GITHUB_OUTPUT
+        continue-on-error: true
+        
+      - name: Check for critical issues
+        run: |
+          # Check if portfolio data is stale
+          python -c "
+          import json
+          import os
+          from datetime import datetime, timedelta
+          
+          critical_issues = []
+          
+          if os.path.exists('docs/latest.json'):
+              with open('docs/latest.json', 'r') as f:
+                  data = json.load(f)
+                  
+              last_date = datetime.strptime(data['date'], '%Y-%m-%d')
+              days_old = (datetime.now() - last_date).days
+              
+              if days_old > 3:
+                  critical_issues.append(f'Portfolio data is {days_old} days stale')
+                  
+              # Check for null prices
+              null_prices = [s for s, p in data['prices'].items() if p is None]
+              if len(null_prices) >= 3:
+                  critical_issues.append(f'Multiple missing prices: {null_prices}')
+          
+          if critical_issues:
+              print('CRITICAL_ISSUES_FOUND')
+              for issue in critical_issues:
+                  print(f'- {issue}')
+          else:
+              print('NO_CRITICAL_ISSUES')
+          " > critical_check.txt
+          
+      - name: Create issue for critical problems
+        if: contains(steps.health-check.outcome, 'failure')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const healthReport = fs.readFileSync('health_report.txt', 'utf8');
+            const criticalCheck = fs.readFileSync('critical_check.txt', 'utf8');
+            
+            if (criticalCheck.includes('CRITICAL_ISSUES_FOUND')) {
+              github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Portfolio Tracker Critical Issue - ${new Date().toISOString().split('T')[0]}`,
+                body: `## Critical Issues Detected\n\n### Health Report\n\`\`\`\n${healthReport}\n\`\`\`\n\n### Critical Issues\n\`\`\`\n${criticalCheck}\n\`\`\`\n\n**Action Required:** Check portfolio data sources and API connectivity.`,
+                labels: ['bug', 'critical', 'portfolio-tracker']
+              });
+            }

@@ -48,5 +48,6 @@
       "total_change": -2.2737367544323206e-13,
       "total_change_pct": -1.713777194048812e-14
     }
-  }
+  },
+  "claude_decisions_executed": false
 }

@@ -1,0 +1,31 @@
+{
+  "symbols": [
+    "GEVO",
+    "FEIM", 
+    "ARQ",
+    "UPXI"
+  ],
+  "positions": {
+    "GEVO": 299,
+    "FEIM": 10,
+    "ARQ": 37,
+    "UPXI": 17
+  },
+  "stops": {
+    "GEVO": 0.95,
+    "FEIM": 26.50,
+    "ARQ": 5.80,
+    "UPXI": 4.75
+  },
+  "initial_cash": 0,
+  "start_date": "2025-08-09",
+  "report_timezone": "America/Argentina/Buenos_Aires",
+  "use_adjusted_close": false,
+  "challenge_params": {
+    "start_date": "2025-08-08",
+    "end_date": "2025-09-09",
+    "initial_value": 995.74,
+    "target_return_min": 300,
+    "target_return_max": 500
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "cash": 0,
+  "holdings": {
+    "GEVO": 299,
+    "FEIM": 10,
+    "ARQ": 37,
+    "UPXI": 17
+  },
+  "last_valuation_date": "2025-08-12",
+  "challenge_metadata": {
+    "start_date": "2025-08-08",
+    "initial_value": 995.74,
+    "strategy": "concentrated_microcap",
+    "risk_level": "aggressive"
+  },
+  "stop_losses": {
+    "GEVO": 0.95,
+    "FEIM": 26.50,
+    "ARQ": 5.80,
+    "UPXI": 4.75
+  },
+  "target_allocations": {
+    "GEVO": 35,
+    "FEIM": 30,
+    "ARQ": 25,
+    "UPXI": 10
+  }
+}

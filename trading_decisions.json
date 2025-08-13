@@ -1,0 +1,50 @@
+{
+  "last_updated": "2025-08-13",
+  "decision_date": "2025-08-13",
+  "decision_type": "HOLD",
+  "analyst": "Claude",
+  "rationale": "Portfolio momentum accelerating with +3.0% daily gain. ARQ and UPXI leading validates diversified approach. All positions well above stop-losses.",
+  "execution_queue": [
+    {
+      "symbol": "GEVO",
+      "action": "HOLD",
+      "current_quantity": 299,
+      "target_quantity": 299,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
+    },
+    {
+      "symbol": "FEIM",
+      "action": "HOLD", 
+      "current_quantity": 10,
+      "target_quantity": 10,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
+    },
+    {
+      "symbol": "ARQ",
+      "action": "HOLD",
+      "current_quantity": 37,
+      "target_quantity": 37,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
+    },
+    {
+      "symbol": "UPXI",
+      "action": "HOLD",
+      "current_quantity": 17,
+      "target_quantity": 17,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
+    }
+  ],
+  "risk_management": {
+    "max_position_size": 50,
+    "max_daily_trades": 2,
+    "confirm_before_execution": false
+  }
+}

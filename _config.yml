@@ -1,0 +1,34 @@
+title: "Micro-Cap Portfolio Challenge"
+description: "30-Day Automated Trading Experiment"
+theme: minima
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# GitHub Pages settings
+baseurl: ""
+url: "https://deuxfoistrois.github.io"
+
+# Portfolio metadata
+portfolio:
+  start_date: "2025-08-08"
+  end_date: "2025-09-09"
+  initial_value: 995.74
+  target_return: "300-500%"
+  
+# Social links
+github_username: deuxfoistrois
+twitter_username: your_twitter
+
+# Analytics
+google_analytics: G-XXXXXXXXXX
+
+# Exclude from processing
+exclude:
+  - vendor/
+  - .bundle/
+  - .sass-cache/
+  - node_modules/
+  - reporting/
+  - __pycache__/

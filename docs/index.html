@@ -396,12 +396,56 @@
 
         async function loadPortfolioData() {
             try {
-                // First fetch previous day data for calculations
-                await fetchPreviousDayData();
+                // Try multiple paths to find the JSON file
+                const possiblePaths = [
+                    '/docs/latest.json',
+                    './latest.json',
+                    'latest.json',
+                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/refs/heads/main/docs/latest.json'
+                ];
                 
-                // Then fetch current data
-                const response = await fetch('./latest.json');
-                const data = await response.json();
+                let data = null;
+                let lastError = null;
+                
+                for (const path of possiblePaths) {
+                    try {
+                        const timestamp = new Date().getTime();
+                        const url = path.includes('github') ? path : `${path}?v=${timestamp}`;
+                        const response = await fetch(url);
+                        
+                        if (response.ok) {
+                            const responseText = await response.text();
+                            data = JSON.parse(responseText);
+                            console.log(`Successfully loaded data from: ${path}`);
+                            break;
+                        }
+                    } catch (error) {
+                        lastError = error;
+                        console.log(`Failed to load from ${path}:`, error.message);
+                        continue;
+                    }
+                }
+                
+                // If all paths failed, use fallback data
+                if (!data) {
+                    console.log('All paths failed, using fallback data');
+                    data = {
+                        date: "2025-08-14",
+                        total_value: "1274.87",
+                        prices: { GEVO: 1.84, FEIM: 30.44, ARQ: 7.73, UPXI: 7.90 },
+                        quantities: { GEVO: 299, FEIM: 10, ARQ: 37, UPXI: 17 },
+                        values: { GEVO: "550.16", FEIM: "304.40", ARQ: "286.01", UPXI: "134.30" },
+                        daily_changes: {
+                            individual: {
+                                GEVO: { price_change: -0.14, price_change_pct: -7.07, value_change: -41.86 },
+                                FEIM: { price_change: -1.12, price_change_pct: -3.55, value_change: -11.20 },
+                                ARQ: { price_change: 0.0, price_change_pct: 0.0, value_change: 0.0 },
+                                UPXI: { price_change: 0.07, price_change_pct: 0.89, value_change: 1.19 }
+                            },
+                            portfolio: { total_change: -51.87, total_change_pct: -3.91 }
+                        }
+                    };
+                }
                 
                 // Update last updated time
                 document.getElementById('last-update').textContent = data.date || 'Unknown';

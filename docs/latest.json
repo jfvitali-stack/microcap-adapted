@@ -1,12 +1,12 @@
 {
-  "date": "2025-08-13",
+  "date": "2025-08-14",
   "cash": "0.00",
-  "total_value": "1326.74",
+  "total_value": "1274.87",
   "prices": {
-    "GEVO": 1.98,
-    "FEIM": 31.56,
+    "GEVO": 1.84,
+    "FEIM": 30.44,
     "ARQ": 7.73,
-    "UPXI": 7.83
+    "UPXI": 7.9
   },
   "quantities": {
     "GEVO": 299,
@@ -15,23 +15,23 @@
     "UPXI": 17
   },
   "values": {
-    "GEVO": "592.02",
-    "FEIM": "315.60",
+    "GEVO": "550.16",
+    "FEIM": "304.40",
     "ARQ": "286.01",
-    "UPXI": "133.11"
+    "UPXI": "134.30"
   },
   "actions": null,
   "daily_changes": {
     "individual": {
       "GEVO": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": -0.1399999999999999,
+        "price_change_pct": -7.0707070707070665,
+        "value_change": -41.85999999999997
       },
       "FEIM": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": -1.1199999999999974,
+        "price_change_pct": -3.5487959442331984,
+        "value_change": -11.199999999999974
       },
       "ARQ": {
         "price_change": 0.0,
@@ -39,14 +39,14 @@
         "value_change": 0.0
       },
       "UPXI": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": 0.07000000000000028,
+        "price_change_pct": 0.8939974457215872,
+        "value_change": 1.1900000000000048
       }
     },
     "portfolio": {
-      "total_change": -2.2737367544323206e-13,
-      "total_change_pct": -1.713777194048812e-14
+      "total_change": -51.87000000000012,
+      "total_change_pct": -3.9095828873780936
     }
   },
   "claude_decisions_executed": false

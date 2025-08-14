@@ -200,13 +200,23 @@
             font-weight: bold;
             margin: 5px 0;
         }
+
+        .loading {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🚀 Micro-Cap Portfolio Challenge</h1>
-            <div class="subtitle">30-Day Trading Experiment | Target: 300-500% Returns</div>
+            <div class="subtitle">30-Day Trading Experiment | Target: Professional Returns</div>
         </div>
         
         <div class="last-updated">
@@ -240,29 +250,10 @@
             </div>
         </div>
 
-        <div class="daily-performance">
-            <h3>📈 Today's Performance (Aug 13, 2025)</h3>
-            <div class="perf-grid">
-                <div class="perf-item">
-                    <div class="symbol">GEVO</div>
-                    <div class="change negative">-$0.01 (-0.5%)</div>
-                    <div>Value: -$2.99</div>
-                </div>
-                <div class="perf-item">
-                    <div class="symbol">FEIM</div>
-                    <div class="change positive">+$0.27 (+0.9%)</div>
-                    <div>Value: +$2.70</div>
-                </div>
-                <div class="perf-item">
-                    <div class="symbol">ARQ</div>
-                    <div class="change positive">+$0.53 (+7.4%)</div>
-                    <div>Value: +$19.61</div>
-                </div>
-                <div class="perf-item">
-                    <div class="symbol">UPXI</div>
-                    <div class="change positive">+$1.17 (+17.6%)</div>
-                    <div>Value: +$19.89</div>
-                </div>
+        <div class="daily-performance" id="daily-performance-section">
+            <h3>📈 Today's Performance</h3>
+            <div class="perf-grid" id="daily-performance-grid">
+                <div class="loading">Loading daily performance data...</div>
             </div>
         </div>
         
@@ -295,19 +286,120 @@
     </div>
 
     <script>
-        // Manual daily change data (until automated tracking is set up)
-        const dailyChanges = {
-            portfolio: { total_change: 39.21, total_change_pct: 3.0 },
-            individual: {
-                GEVO: { price_change: -0.01, price_change_pct: -0.5, value_change: -2.99 },
-                FEIM: { price_change: 0.27, price_change_pct: 0.9, value_change: 2.70 },
-                ARQ: { price_change: 0.53, price_change_pct: 7.4, value_change: 19.61 },
-                UPXI: { price_change: 1.17, price_change_pct: 17.6, value_change: 19.89 }
+        // Global variables for previous day data
+        let previousDayData = null;
+
+        async function fetchPreviousDayData() {
+            try {
+                // Try to get historical data from CSV if available
+                const response = await fetch('./portfolio_history.csv');
+                if (response.ok) {
+                    const csvText = await response.text();
+                    const lines = csvText.trim().split('\n');
+                    
+                    if (lines.length >= 3) { // Header + at least 2 data rows
+                        const headers = lines[0].split(',');
+                        const previousRow = lines[lines.length - 2].split(','); // Second to last row
+                        
+                        // Parse previous day data
+                        previousDayData = {};
+                        headers.forEach((header, index) => {
+                            previousDayData[header.trim()] = previousRow[index];
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log('Could not fetch historical data for daily changes');
             }
-        };
+        }
+
+        function calculateDailyChanges(currentData) {
+            const changes = {
+                portfolio: { total_change: 0, total_change_pct: 0 },
+                individual: {}
+            };
+
+            // If we have daily_changes in the JSON, use that
+            if (currentData.daily_changes) {
+                return currentData.daily_changes;
+            }
+
+            // Otherwise calculate from previous day data if available
+            if (previousDayData) {
+                const currentTotal = parseFloat(currentData.total_value) || 0;
+                const previousTotal = parseFloat(previousDayData.total_value) || 0;
+                
+                if (previousTotal > 0) {
+                    changes.portfolio.total_change = currentTotal - previousTotal;
+                    changes.portfolio.total_change_pct = (changes.portfolio.total_change / previousTotal) * 100;
+                }
+
+                // Calculate individual stock changes
+                const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
+                symbols.forEach(symbol => {
+                    const currentPrice = currentData.prices[symbol];
+                    const previousPrice = parseFloat(previousDayData[`${symbol}_close`]) || 0;
+                    const quantity = currentData.quantities[symbol] || 0;
+
+                    if (currentPrice && previousPrice > 0) {
+                        const priceChange = currentPrice - previousPrice;
+                        const priceChangePct = (priceChange / previousPrice) * 100;
+                        const valueChange = priceChange * quantity;
+
+                        changes.individual[symbol] = {
+                            price_change: priceChange,
+                            price_change_pct: priceChangePct,
+                            value_change: valueChange
+                        };
+                    } else {
+                        changes.individual[symbol] = {
+                            price_change: 0,
+                            price_change_pct: 0,
+                            value_change: 0
+                        };
+                    }
+                });
+            }
+
+            return changes;
+        }
+
+        function updateDailyPerformance(dailyChanges, currentDate) {
+            const grid = document.getElementById('daily-performance-grid');
+            const section = document.getElementById('daily-performance-section');
+            
+            // Update section title with current date
+            section.querySelector('h3').textContent = `📈 Today's Performance (${currentDate})`;
+            
+            grid.innerHTML = '';
+
+            const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
+            symbols.forEach(symbol => {
+                const change = dailyChanges.individual[symbol];
+                if (change) {
+                    const perfItem = document.createElement('div');
+                    perfItem.className = 'perf-item';
+                    
+                    const changeClass = change.price_change_pct >= 0 ? 'positive' : 'negative';
+                    const changeSign = change.price_change_pct >= 0 ? '+' : '';
+                    
+                    perfItem.innerHTML = `
+                        <div class="symbol">${symbol}</div>
+                        <div class="change ${changeClass}">${changeSign}$${change.price_change.toFixed(2)} (${changeSign}${change.price_change_pct.toFixed(1)}%)</div>
+                        <div>Value: ${changeSign}$${change.value_change.toFixed(2)}</div>
+                    `;
+                    
+                    grid.appendChild(perfItem);
+                }
+            });
+        }
 
         async function loadPortfolioData() {
             try {
+                // First fetch previous day data for calculations
+                await fetchPreviousDayData();
+                
+                // Then fetch current data
                 const response = await fetch('./latest.json');
                 const data = await response.json();
                 
@@ -326,20 +418,29 @@
                 returnElement.textContent = `${totalReturn.toFixed(2)}%`;
                 returnElement.className = totalReturn >= 0 ? 'value positive' : 'value negative';
                 
-                // Daily change
+                // Calculate and display daily changes
+                const dailyChanges = calculateDailyChanges(data);
                 const dailyChangeElement = document.getElementById('daily-change');
                 const dailyChange = dailyChanges.portfolio.total_change_pct;
-                dailyChangeElement.textContent = `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}%`;
-                dailyChangeElement.className = dailyChange >= 0 ? 'value positive' : 'value negative';
                 
-                // Target progress (300% target)
-                const targetProgress = (totalReturn / 300) * 100;
+                if (dailyChange !== 0 || dailyChanges.portfolio.total_change !== 0) {
+                    dailyChangeElement.textContent = `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}%`;
+                    dailyChangeElement.className = dailyChange >= 0 ? 'value positive' : 'value negative';
+                } else {
+                    dailyChangeElement.textContent = 'No Change';
+                    dailyChangeElement.className = 'value';
+                }
+                
+                // Update daily performance section
+                updateDailyPerformance(dailyChanges, data.date);
+                
+                // Target progress (using 25% as professional target)
+                const targetProgress = (totalReturn / 25) * 100;
                 document.getElementById('target-progress').textContent = `${Math.min(targetProgress, 100).toFixed(1)}%`;
                 
                 // Challenge progress
                 const startDate = new Date('2025-08-08');
                 const currentDate = new Date(data.date);
-                const endDate = new Date('2025-09-09');
                 const totalDays = 30;
                 const daysElapsed = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
                 const daysRemaining = Math.max(0, totalDays - daysElapsed);
@@ -385,6 +486,8 @@
                 console.error('Failed to load portfolio data:', error);
                 document.getElementById('positions-table').innerHTML = 
                     '<tr><td colspan="7" style="text-align: center; color: #e74c3c;">Failed to load data</td></tr>';
+                document.getElementById('daily-change').textContent = 'Error';
+                document.getElementById('daily-change').className = 'value error';
             }
         }
         

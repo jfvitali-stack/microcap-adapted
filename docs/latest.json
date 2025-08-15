@@ -1,53 +1,53 @@
 {
   "date": "2025-08-15",
-  "cash": "0.00",
-  "total_value": "1254.76",
+  "cash": "180.00",
+  "total_value": "1242.80",
   "prices": {
-    "GEVO": 1.84,
+    "GEVO": 1.8,
     "FEIM": 30.77,
     "ARQ": 7.35,
     "UPXI": 7.35
   },
   "quantities": {
-    "GEVO": 299,
+    "GEVO": 199,
     "FEIM": 10,
     "ARQ": 37,
     "UPXI": 17
   },
   "values": {
-    "GEVO": "550.16",
+    "GEVO": "358.20",
     "FEIM": "307.70",
     "ARQ": "271.95",
     "UPXI": "124.95"
   },
-  "actions": null,
+  "actions": "\ud83e\udd16 CLAUDE TRIM GEVO: 100 shares @ $1.8000 = $180.00",
   "daily_changes": {
     "individual": {
       "GEVO": {
+        "price_change": -0.040000000000000036,
+        "price_change_pct": -2.1739130434782625,
+        "value_change": -11.960000000000012
+      },
+      "FEIM": {
         "price_change": 0.0,
         "price_change_pct": 0.0,
         "value_change": 0.0
       },
-      "FEIM": {
-        "price_change": 0.3299999999999983,
-        "price_change_pct": 1.0840998685939498,
-        "value_change": 3.299999999999983
-      },
       "ARQ": {
-        "price_change": -0.3800000000000008,
-        "price_change_pct": -4.915912031047876,
-        "value_change": -14.060000000000029
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "UPXI": {
-        "price_change": -0.5500000000000007,
-        "price_change_pct": -6.962025316455706,
-        "value_change": -9.350000000000012
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       }
     },
     "portfolio": {
-      "total_change": -20.1099999999999,
-      "total_change_pct": -1.5774157365064596
+      "total_change": -11.959999999999809,
+      "total_change_pct": -0.9531703273932712
     }
   },
-  "claude_decisions_executed": false
+  "claude_decisions_executed": true
 }

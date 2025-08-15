@@ -1,22 +1,22 @@
 {
-  "last_updated": "2025-08-13",
-  "decision_date": "2025-08-13",
-  "decision_type": "HOLD",
-  "analyst": "Claude",
-  "rationale": "Portfolio momentum accelerating with +3.0% daily gain. ARQ and UPXI leading validates diversified approach. All positions well above stop-losses.",
+  "last_updated": "2025-08-15T21:00:00Z",
+  "decision_date": "2025-08-15",
+  "decision_type": "DEFENSIVE_REBALANCING",
+  "analyst": "Claude Sonnet 4",
+  "rationale": "Two consecutive days of benchmark underperformance (-3.9%, -1.58%) with excessive GEVO concentration at 43.8%. Implementing defensive positioning while maintaining selective micro-cap exposure.",
   "execution_queue": [
     {
       "symbol": "GEVO",
-      "action": "HOLD",
+      "action": "TRIM_TO",
       "current_quantity": 299,
-      "target_quantity": 299,
+      "target_quantity": 199,
       "trigger_price": null,
       "order_type": "MARKET",
-      "status": "ACTIVE"
+      "status": "PENDING"
     },
     {
       "symbol": "FEIM",
-      "action": "HOLD", 
+      "action": "HOLD",
       "current_quantity": 10,
       "target_quantity": 10,
       "trigger_price": null,
@@ -42,9 +42,9 @@
       "status": "ACTIVE"
     }
   ],
+  "expected_proceeds": "~$184",
   "risk_management": {
-    "max_position_size": 50,
-    "max_daily_trades": 2,
-    "confirm_before_execution": false
+    "max_position_size": 35,
+    "target_cash_buffer": 15
   }
 }

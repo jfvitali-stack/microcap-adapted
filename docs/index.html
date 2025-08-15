@@ -162,53 +162,28 @@
             height: 100%;
             transition: width 0.3s ease;
         }
-
+        
+        .trade-alert {
+            background: #2ecc71;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .cash-row {
+            background: #f1f2f6;
+            font-weight: bold;
+        }
+        
         .daily-performance {
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .daily-performance h3 {
-            color: #2c3e50;
-            margin-top: 0;
-        }
-
-        .perf-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .perf-item {
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .perf-item .symbol {
-            font-weight: bold;
-            color: #2980b9;
-            font-size: 1.1em;
-        }
-
-        .perf-item .change {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-
-        .loading {
-            color: #7f8c8d;
-            font-style: italic;
-        }
-
-        .error {
-            color: #e74c3c;
-            font-weight: bold;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -221,6 +196,10 @@
         
         <div class="last-updated">
             📅 Last Updated: <span id="last-update">Loading...</span>
+        </div>
+        
+        <div id="trade-alert" class="trade-alert" style="display: none;">
+            <span id="trade-message"></span>
         </div>
         
         <div class="challenge-progress">
@@ -242,18 +221,18 @@
             </div>
             <div class="stat-card">
                 <h3>Daily Change</h3>
-                <div class="value" id="daily-change">Loading...</div>
+                <div class="value" id="daily-change">0.00%</div>
             </div>
             <div class="stat-card">
                 <h3>Target Progress</h3>
                 <div class="value" id="target-progress">0.0%</div>
             </div>
         </div>
-
-        <div class="daily-performance" id="daily-performance-section">
-            <h3>📈 Today's Performance</h3>
-            <div class="perf-grid" id="daily-performance-grid">
-                <div class="loading">Loading daily performance data...</div>
+        
+        <div class="daily-performance">
+            <div class="table-header">📈 Today's Performance (<span id="performance-date">2025-08-15</span>)</div>
+            <div id="daily-summary" style="padding: 20px;">
+                Loading daily performance...
             </div>
         </div>
         
@@ -286,174 +265,34 @@
     </div>
 
     <script>
-        // Global variables for previous day data
-        let previousDayData = null;
-
-        async function fetchPreviousDayData() {
-            try {
-                // Try to get historical data from CSV if available
-                const response = await fetch('./portfolio_history.csv');
-                if (response.ok) {
-                    const csvText = await response.text();
-                    const lines = csvText.trim().split('\n');
-                    
-                    if (lines.length >= 3) { // Header + at least 2 data rows
-                        const headers = lines[0].split(',');
-                        const previousRow = lines[lines.length - 2].split(','); // Second to last row
-                        
-                        // Parse previous day data
-                        previousDayData = {};
-                        headers.forEach((header, index) => {
-                            previousDayData[header.trim()] = previousRow[index];
-                        });
-                    }
-                }
-            } catch (error) {
-                console.log('Could not fetch historical data for daily changes');
-            }
-        }
-
-        function calculateDailyChanges(currentData) {
-            const changes = {
-                portfolio: { total_change: 0, total_change_pct: 0 },
-                individual: {}
-            };
-
-            // If we have daily_changes in the JSON, use that
-            if (currentData.daily_changes) {
-                return currentData.daily_changes;
-            }
-
-            // Otherwise calculate from previous day data if available
-            if (previousDayData) {
-                const currentTotal = parseFloat(currentData.total_value) || 0;
-                const previousTotal = parseFloat(previousDayData.total_value) || 0;
-                
-                if (previousTotal > 0) {
-                    changes.portfolio.total_change = currentTotal - previousTotal;
-                    changes.portfolio.total_change_pct = (changes.portfolio.total_change / previousTotal) * 100;
-                }
-
-                // Calculate individual stock changes
-                const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
-                symbols.forEach(symbol => {
-                    const currentPrice = currentData.prices[symbol];
-                    const previousPrice = parseFloat(previousDayData[`${symbol}_close`]) || 0;
-                    const quantity = currentData.quantities[symbol] || 0;
-
-                    if (currentPrice && previousPrice > 0) {
-                        const priceChange = currentPrice - previousPrice;
-                        const priceChangePct = (priceChange / previousPrice) * 100;
-                        const valueChange = priceChange * quantity;
-
-                        changes.individual[symbol] = {
-                            price_change: priceChange,
-                            price_change_pct: priceChangePct,
-                            value_change: valueChange
-                        };
-                    } else {
-                        changes.individual[symbol] = {
-                            price_change: 0,
-                            price_change_pct: 0,
-                            value_change: 0
-                        };
-                    }
-                });
-            }
-
-            return changes;
-        }
-
-        function updateDailyPerformance(dailyChanges, currentDate) {
-            const grid = document.getElementById('daily-performance-grid');
-            const section = document.getElementById('daily-performance-section');
-            
-            // Update section title with current date
-            section.querySelector('h3').textContent = `📈 Today's Performance (${currentDate})`;
-            
-            grid.innerHTML = '';
-
-            const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
-            symbols.forEach(symbol => {
-                const change = dailyChanges.individual[symbol];
-                if (change) {
-                    const perfItem = document.createElement('div');
-                    perfItem.className = 'perf-item';
-                    
-                    const changeClass = change.price_change_pct >= 0 ? 'positive' : 'negative';
-                    const changeSign = change.price_change_pct >= 0 ? '+' : '';
-                    
-                    perfItem.innerHTML = `
-                        <div class="symbol">${symbol}</div>
-                        <div class="change ${changeClass}">${changeSign}$${change.price_change.toFixed(2)} (${changeSign}${change.price_change_pct.toFixed(1)}%)</div>
-                        <div>Value: ${changeSign}$${change.value_change.toFixed(2)}</div>
-                    `;
-                    
-                    grid.appendChild(perfItem);
-                }
-            });
-        }
-
         async function loadPortfolioData() {
             try {
-                // Try multiple paths to find the JSON file
-                const possiblePaths = [
-                    '/docs/latest.json',
-                    './latest.json',
-                    'latest.json',
-                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/refs/heads/main/docs/latest.json'
-                ];
+                const timestamp = Date.now();
+                const response = await fetch(`./latest.json?v=${timestamp}`);
                 
-                let data = null;
-                let lastError = null;
-                
-                for (const path of possiblePaths) {
-                    try {
-                        const timestamp = new Date().getTime();
-                        const url = path.includes('github') ? path : `${path}?v=${timestamp}`;
-                        const response = await fetch(url);
-                        
-                        if (response.ok) {
-                            const responseText = await response.text();
-                            data = JSON.parse(responseText);
-                            console.log(`Successfully loaded data from: ${path}`);
-                            break;
-                        }
-                    } catch (error) {
-                        lastError = error;
-                        console.log(`Failed to load from ${path}:`, error.message);
-                        continue;
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // If all paths failed, use fallback data
-                if (!data) {
-                    console.log('All paths failed, using fallback data');
-                    data = {
-                        date: "2025-08-14",
-                        total_value: "1274.87",
-                        prices: { GEVO: 1.84, FEIM: 30.44, ARQ: 7.73, UPXI: 7.90 },
-                        quantities: { GEVO: 299, FEIM: 10, ARQ: 37, UPXI: 17 },
-                        values: { GEVO: "550.16", FEIM: "304.40", ARQ: "286.01", UPXI: "134.30" },
-                        daily_changes: {
-                            individual: {
-                                GEVO: { price_change: -0.14, price_change_pct: -7.07, value_change: -41.86 },
-                                FEIM: { price_change: -1.12, price_change_pct: -3.55, value_change: -11.20 },
-                                ARQ: { price_change: 0.0, price_change_pct: 0.0, value_change: 0.0 },
-                                UPXI: { price_change: 0.07, price_change_pct: 0.89, value_change: 1.19 }
-                            },
-                            portfolio: { total_change: -51.87, total_change_pct: -3.91 }
-                        }
-                    };
-                }
+                const data = await response.json();
                 
                 // Update last updated time
                 document.getElementById('last-update').textContent = data.date || 'Unknown';
+                document.getElementById('performance-date').textContent = data.date || 'Unknown';
+                
+                // Show trade execution if present
+                if (data.actions && data.claude_decisions_executed) {
+                    const alertDiv = document.getElementById('trade-alert');
+                    const messageSpan = document.getElementById('trade-message');
+                    messageSpan.textContent = data.actions;
+                    alertDiv.style.display = 'block';
+                }
                 
                 // Calculate metrics
                 const initialValue = 995.74;
                 const currentValue = parseFloat(data.total_value) || 0;
                 const totalReturn = ((currentValue - initialValue) / initialValue * 100);
+                const cash = parseFloat(data.cash) || 0;
                 
                 // Update summary stats
                 document.getElementById('current-value').textContent = `$${currentValue.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
@@ -462,24 +301,23 @@
                 returnElement.textContent = `${totalReturn.toFixed(2)}%`;
                 returnElement.className = totalReturn >= 0 ? 'value positive' : 'value negative';
                 
-                // Calculate and display daily changes
-                const dailyChanges = calculateDailyChanges(data);
-                const dailyChangeElement = document.getElementById('daily-change');
-                const dailyChange = dailyChanges.portfolio.total_change_pct;
+                // Daily change
+                let dailyChangeText = "No Change";
+                let dailyChangeClass = "value";
                 
-                if (dailyChange !== 0 || dailyChanges.portfolio.total_change !== 0) {
-                    dailyChangeElement.textContent = `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}%`;
-                    dailyChangeElement.className = dailyChange >= 0 ? 'value positive' : 'value negative';
-                } else {
-                    dailyChangeElement.textContent = 'No Change';
-                    dailyChangeElement.className = 'value';
+                if (data.daily_changes && data.daily_changes.portfolio) {
+                    const dailyChangePct = data.daily_changes.portfolio.total_change_pct || 0;
+                    const dailyChangeValue = data.daily_changes.portfolio.total_change || 0;
+                    dailyChangeText = `${dailyChangePct >= 0 ? '+' : ''}${dailyChangePct.toFixed(2)}% (${dailyChangeValue >= 0 ? '+' : ''}$${Math.abs(dailyChangeValue).toFixed(2)})`;
+                    dailyChangeClass = dailyChangePct >= 0 ? 'value positive' : 'value negative';
                 }
                 
-                // Update daily performance section
-                updateDailyPerformance(dailyChanges, data.date);
+                const dailyElement = document.getElementById('daily-change');
+                dailyElement.textContent = dailyChangeText;
+                dailyElement.className = dailyChangeClass;
                 
-                // Target progress (using 25% as professional target)
-                const targetProgress = (totalReturn / 25) * 100;
+                // Target progress (300% target)
+                const targetProgress = (totalReturn / 300) * 100;
                 document.getElementById('target-progress').textContent = `${Math.min(targetProgress, 100).toFixed(1)}%`;
                 
                 // Challenge progress
@@ -493,6 +331,27 @@
                 document.getElementById('day-number').textContent = daysElapsed + 1;
                 document.getElementById('days-remaining').textContent = daysRemaining;
                 document.getElementById('progress-bar').style.width = `${Math.min(progressPercent, 100)}%`;
+                
+                // Daily performance summary
+                let dailySummaryHTML = "";
+                if (data.daily_changes && data.daily_changes.individual) {
+                    const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
+                    symbols.forEach(symbol => {
+                        const change = data.daily_changes.individual[symbol];
+                        if (change && data.quantities[symbol] > 0) {
+                            const changeClass = change.price_change_pct >= 0 ? 'positive' : 'negative';
+                            const sign = change.price_change_pct >= 0 ? '+' : '';
+                            dailySummaryHTML += `
+                                <div style="display: inline-block; margin: 10px 20px;">
+                                    <strong>${symbol}</strong><br>
+                                    <span class="${changeClass}">${sign}$${change.price_change.toFixed(2)} (${sign}${change.price_change_pct.toFixed(1)}%)</span><br>
+                                    <small>Value: ${sign}$${Math.abs(change.value_change).toFixed(2)}</small>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                document.getElementById('daily-summary').innerHTML = dailySummaryHTML || "No daily performance data available";
                 
                 // Update positions table
                 const tableBody = document.getElementById('positions-table');
@@ -526,12 +385,26 @@
                     }
                 });
                 
+                // Add cash row if there's cash
+                if (cash > 0) {
+                    const cashAllocation = (cash / currentValue) * 100;
+                    const cashRow = tableBody.insertRow();
+                    cashRow.className = 'cash-row';
+                    cashRow.innerHTML = `
+                        <td class="ticker">💵 CASH</td>
+                        <td>-</td>
+                        <td>$1.0000</td>
+                        <td>$${cash.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                        <td class="positive">0.00%</td>
+                        <td>${cashAllocation.toFixed(1)}%</td>
+                        <td>-</td>
+                    `;
+                }
+                
             } catch (error) {
                 console.error('Failed to load portfolio data:', error);
                 document.getElementById('positions-table').innerHTML = 
                     '<tr><td colspan="7" style="text-align: center; color: #e74c3c;">Failed to load data</td></tr>';
-                document.getElementById('daily-change').textContent = 'Error';
-                document.getElementById('daily-change').className = 'value error';
             }
         }
         

@@ -1,6 +1,6 @@
 # 🚀 Micro-Cap Portfolio Challenge
 
-**30-Day Automated Trading Experiment | Target: 300-500% Returns**
+**30-Day Automated Trading Experiment | Target: 75-100% Returns**
 
 ## 📊 Portfolio Overview
 

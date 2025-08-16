@@ -20,13 +20,13 @@
     "ARQ": "271.95",
     "UPXI": "124.95"
   },
-  "actions": "\ud83e\udd16 CLAUDE TRIM GEVO: 100 shares @ $1.8000 = $180.00",
+  "actions": null,
   "daily_changes": {
     "individual": {
       "GEVO": {
-        "price_change": -0.040000000000000036,
-        "price_change_pct": -2.1739130434782625,
-        "value_change": -11.960000000000012
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "FEIM": {
         "price_change": 0.0,
@@ -45,9 +45,9 @@
       }
     },
     "portfolio": {
-      "total_change": -11.959999999999809,
-      "total_change_pct": -0.9531703273932712
+      "total_change": 2.2737367544323206e-13,
+      "total_change_pct": 1.8295274818412623e-14
     }
   },
-  "claude_decisions_executed": true
+  "claude_decisions_executed": false
 }

@@ -8,5 +8,3 @@
 
 Cash: $180.00
 **Total value**: $1242.80
-
-**Actions**: 🤖 CLAUDE TRIM GEVO: 100 shares @ $1.8000 = $180.00

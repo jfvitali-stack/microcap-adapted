@@ -261,30 +261,51 @@
 
         async function loadPortfolioData() {
             try {
-                const timestamp = Date.now();
-                const response = await fetch(`/docs/latest.json?v=${timestamp}`);
+                // Try multiple paths to find the JSON file
+                const possiblePaths = [
+                    './latest.json',
+                    'latest.json',
+                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/refs/heads/main/docs/latest.json'
+                ];
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                let data = null;
+                let loadedFrom = '';
+                
+                for (const path of possiblePaths) {
+                    try {
+                        console.log(`Trying to load from: ${path}`);
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            data = await response.json();
+                            loadedFrom = path;
+                            console.log(`Successfully loaded from: ${path}`);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to load from ${path}: ${e.message}`);
+                        continue;
+                    }
                 }
                 
-                const data = await response.json();
+                if (!data) {
+                    throw new Error('Could not load data from any path');
+                }
                 
                 // Update last updated time
                 document.getElementById('last-update').textContent = data.date || 'Unknown';
                 
                 // Show trade execution if present
-                if (data.actions && data.claude_decisions_executed) {
+                if (data.actions) {
                     const alertDiv = document.getElementById('trade-alert');
                     const messageSpan = document.getElementById('trade-message');
-                    messageSpan.textContent = data.actions;
+                    messageSpan.textContent = Array.isArray(data.actions) ? data.actions.join(', ') : data.actions;
                     alertDiv.style.display = 'block';
                 }
                 
                 // Calculate metrics
                 const initialValue = 995.74;
                 const currentValue = parseFloat(data.total_value) || 0;
-                const totalReturn = ((currentValue - initialValue) / initialValue * 100);
+                const totalReturn = currentValue > 0 ? ((currentValue - initialValue) / initialValue * 100) : 0;
                 const cash = parseFloat(data.cash) || 0;
                 
                 // Update summary stats
@@ -300,7 +321,6 @@
                 
                 if (data.daily_changes && data.daily_changes.portfolio) {
                     const dailyChangePct = data.daily_changes.portfolio.total_change_pct || 0;
-                    const dailyChangeValue = data.daily_changes.portfolio.total_change || 0;
                     dailyChangeText = `${dailyChangePct >= 0 ? '+' : ''}${dailyChangePct.toFixed(2)}%`;
                     dailyChangeClass = dailyChangePct >= 0 ? 'value positive' : 'value negative';
                 }
@@ -325,15 +345,18 @@
                 const tableBody = document.getElementById('positions-table');
                 tableBody.innerHTML = '';
                 
+                let hasPositions = false;
+                
                 // Add stock positions
-                if (data.quantities) {
+                if (data.quantities && Object.keys(data.quantities).length > 0) {
                     Object.keys(data.quantities).forEach(symbol => {
                         const shares = data.quantities[symbol];
-                        const price = data.prices[symbol];
-                        const value = parseFloat(data.values[symbol]) || 0;
+                        const price = data.prices ? data.prices[symbol] : null;
+                        const value = data.values ? parseFloat(data.values[symbol]) || 0 : 0;
                         
                         if (shares > 0 && price) {
-                            const allocation = (value / currentValue) * 100;
+                            hasPositions = true;
+                            const allocation = currentValue > 0 ? (value / currentValue) * 100 : 0;
                             const companyName = companyNames[symbol] || symbol;
                             
                             const row = tableBody.insertRow();
@@ -351,7 +374,8 @@
                 
                 // Add cash row if there's cash
                 if (cash > 0) {
-                    const cashAllocation = (cash / currentValue) * 100;
+                    hasPositions = true;
+                    const cashAllocation = currentValue > 0 ? (cash / currentValue) * 100 : 0;
                     const cashRow = tableBody.insertRow();
                     cashRow.className = 'cash-row';
                     cashRow.innerHTML = `
@@ -364,24 +388,29 @@
                     `;
                 }
                 
-                // If no positions, show empty state
-                if (tableBody.children.length === 0) {
+                // If no positions, show message
+                if (!hasPositions) {
                     const emptyRow = tableBody.insertRow();
-                    emptyRow.innerHTML = '<td colspan="6" style="text-align: center; padding: 40px;">No positions found</td>';
+                    emptyRow.innerHTML = `<td colspan="6" style="text-align: center; padding: 40px;">
+                        No positions found. Data loaded from: ${loadedFrom}
+                    </td>`;
                 }
                 
             } catch (error) {
                 console.error('Failed to load portfolio data:', error);
                 document.getElementById('positions-table').innerHTML = 
-                    '<tr><td colspan="6" style="text-align: center; color: #e74c3c;">Failed to load data</td></tr>';
+                    `<tr><td colspan="6" style="text-align: center; color: #e74c3c;">
+                        Failed to load data: ${error.message}<br>
+                        <small>Check browser console for details</small>
+                    </td></tr>`;
             }
         }
         
         // Load data on page load
         loadPortfolioData();
         
-        // Refresh every 5 minutes
-        setInterval(loadPortfolioData, 5 * 60 * 1000);
+        // Refresh every 30 seconds for testing
+        setInterval(loadPortfolioData, 30000);
     </script>
 </body>
 </html>

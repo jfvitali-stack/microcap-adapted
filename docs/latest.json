@@ -1,11 +1,29 @@
 {
   "date": "2025-08-19",
-  "cash": "0.00",
-  "total_value": "0.00",
-  "prices": {},
-  "quantities": {},
-  "values": {},
-  "actions": null,
+  "cash": "99.04",
+  "total_value": "1181.79",
+  "prices": {
+    "ARQ": 7.19,
+    "UPXI": 6.92,
+    "SERV": 10.26,
+    "MYOMO": 1.12,
+    "CABA": 1.77
+  },
+  "quantities": {
+    "ARQ": 37,
+    "UPXI": 17,
+    "SERV": 26,
+    "MYOMO": 209,
+    "CABA": 112
+  },
+  "values": {
+    "ARQ": "266.03",
+    "UPXI": "117.64",
+    "SERV": "266.76",
+    "MYOMO": "234.08",
+    "CABA": "198.24"
+  },
+  "actions": "SELL ALL GEVO: 199 shares @ $1.6800 = $334.32",
   "daily_changes": null,
-  "claude_decisions_executed": false
+  "claude_decisions_executed": true
 }

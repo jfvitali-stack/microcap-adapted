@@ -34,11 +34,27 @@ def get_alpha_vantage_price(symbol, api_key):
         response = requests.get(url, params=params)
         data = response.json()
         
-        if "Global Quote" in data:
+        if "Global Quote" in data and "05. price" in data["Global Quote"]:
             price = float(data["Global Quote"]["05. price"])
             return price
+        elif "Error Message" in data:
+            print(f"API Error for {symbol}: {data['Error Message']}")
+            return None
+        elif "Note" in data:
+            print(f"API Limit for {symbol}: {data['Note']}")
+            return None
         else:
-            print(f"Error fetching {symbol}: {data}")
+            print(f"Unexpected response for {symbol}: {data}")
+            # Try alternative ticker formats
+            if symbol == "MYOMO":
+                # Try MYO ticker
+                params["symbol"] = "MYO"
+                response = requests.get(url, params=params)
+                data = response.json()
+                if "Global Quote" in data and "05. price" in data["Global Quote"]:
+                    price = float(data["Global Quote"]["05. price"])
+                    print(f"Found {symbol} as MYO: ${price:.4f}")
+                    return price
             return None
     except Exception as e:
         print(f"Error fetching {symbol}: {e}")
@@ -239,6 +255,39 @@ def main():
         print("🔧 Initializing cash with current amount...")
         cash = 180.00
     
+    print(f"📊 Loading existing holdings and cash...")
+    
+    try:
+        with open("data/holdings.json", "r") as f:
+            holdings = json.load(f)
+            print(f"✅ Loaded holdings: {holdings}")
+    except FileNotFoundError:
+        # Initialize with your current portfolio from August 18
+        print("🔧 Initializing holdings with current portfolio...")
+        holdings = {
+            "GEVO": 199,
+            "FEIM": 10, 
+            "ARQ": 37,
+            "UPXI": 17,
+            "SERV": 0,
+            "MYOMO": 0,
+            "CABA": 0
+        }
+        print(f"🔧 Initialized holdings: {holdings}")
+    
+    try:
+        with open("data/cash.json", "r") as f:
+            cash_data = json.load(f)
+            cash = cash_data.get("cash", 0.0)
+            print(f"✅ Loaded cash: ${cash:.2f}")
+    except FileNotFoundError:
+        # Initialize with your current cash from August 18
+        print("🔧 Initializing cash with current amount...")
+        cash = 180.00
+        print(f"🔧 Initialized cash: ${cash:.2f}")
+    
+    print(f"\n📈 Fetching current stock prices...")
+    
     prices = {}
     for symbol in SYMBOLS:
         print(f"Fetching {symbol}...")
@@ -249,9 +298,15 @@ def main():
         else:
             print(f"Failed to fetch {symbol}")
     
+    print(f"\n🔄 Processing trading decisions...")
+    
     current_date = datetime.now().strftime("%Y-%m-%d")
     
     holdings, claude_actions, cash = execute_trading_decisions(holdings, prices, current_date, cash)
+    
+    print(f"\n💰 Calculating portfolio values...")
+    print(f"Holdings after trading: {holdings}")
+    print(f"Cash after trading: ${cash:.2f}")
     
     values = {}
     total_value = cash
@@ -261,8 +316,11 @@ def main():
             value = holdings[symbol] * prices[symbol]
             values[symbol] = f"{value:.2f}"
             total_value += value
+            print(f"{symbol}: {holdings[symbol]} shares × ${prices[symbol]:.4f} = ${value:.2f}")
         else:
             values[symbol] = "0.00"
+    
+    print(f"\n💼 Total portfolio value: ${total_value:.2f}")
     
     previous_data = get_previous_day_data()
     

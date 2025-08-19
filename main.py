@@ -81,38 +81,60 @@ def calculate_daily_changes(current_data, previous_data):
 
 def get_previous_day_data():
     try:
+        if not os.path.exists("data/portfolio_history.csv"):
+            print("No portfolio history CSV found")
+            return None
+            
         df = pd.read_csv("data/portfolio_history.csv")
+        if len(df) < 1:
+            print("Portfolio history CSV is empty")
+            return None
+            
         if len(df) >= 2:
+            # Get second to last row (previous day)
             prev_row = df.iloc[-2]
+        else:
+            # If only one row, use it as baseline
+            prev_row = df.iloc[-1]
+        
+        symbols = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
+        prices = {}
+        quantities = {}
+        
+        for symbol in symbols:
+            price_col = f"{symbol}_price"
+            qty_col = f"{symbol}_qty"
             
-            symbols = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
-            prices = {}
-            quantities = {}
-            
-            for symbol in symbols:
-                if f"{symbol}_price" in prev_row and f"{symbol}_qty" in prev_row:
-                    if pd.notna(prev_row[f"{symbol}_price"]) and prev_row[f"{symbol}_qty"] > 0:
-                        prices[symbol] = prev_row[f"{symbol}_price"]
-                        quantities[symbol] = prev_row[f"{symbol}_qty"]
-            
-            return {
-                "prices": prices,
-                "quantities": quantities,
-                "total_value": str(prev_row["total_value"])
-            }
+            # Check if columns exist
+            if price_col in prev_row and qty_col in prev_row:
+                if pd.notna(prev_row[price_col]) and prev_row[qty_col] > 0:
+                    prices[symbol] = prev_row[price_col]
+                    quantities[symbol] = prev_row[qty_col]
+        
+        return {
+            "prices": prices,
+            "quantities": quantities,
+            "total_value": str(prev_row["total_value"]) if "total_value" in prev_row else "0"
+        }
+        
     except Exception as e:
         print(f"Error loading previous day data: {e}")
-    
-    return None
+        print("Continuing without daily change calculation...")
+        return None
 
 def execute_trading_decisions(holdings, prices, date, cash):
     claude_actions = []
     
     try:
         with open("trading_decisions.json", "r") as f:
-            decisions_data = json.load(f)
+            content = f.read().strip()
+            if not content:
+                print("Trading decisions file is empty")
+                return holdings, claude_actions, cash
+            decisions_data = json.loads(content)
         
         if not decisions_data.get("execution_queue"):
+            print("No pending trading decisions")
             return holdings, claude_actions, cash
         
         print("🤖 Checking Claude's trading decisions...")
@@ -124,23 +146,25 @@ def execute_trading_decisions(holdings, prices, date, cash):
             if action == "SELL_ALL":
                 if symbol in holdings and holdings[symbol] > 0:
                     shares_to_sell = holdings[symbol]
-                    proceeds = shares_to_sell * prices[symbol]
-                    cash += proceeds
-                    holdings[symbol] = 0
-                    action_msg = f"SELL ALL {symbol}: {shares_to_sell} shares @ ${prices[symbol]:.4f} = ${proceeds:.2f}"
-                    claude_actions.append(action_msg)
-                    print(f"✅ Executed: {action_msg}")
+                    if symbol in prices:
+                        proceeds = shares_to_sell * prices[symbol]
+                        cash += proceeds
+                        holdings[symbol] = 0
+                        action_msg = f"SELL ALL {symbol}: {shares_to_sell} shares @ ${prices[symbol]:.4f} = ${proceeds:.2f}"
+                        claude_actions.append(action_msg)
+                        print(f"✅ Executed: {action_msg}")
             
             elif action == "TRIM_TO":
                 target_qty = order["target_quantity"]
                 if symbol in holdings and holdings[symbol] > target_qty:
                     shares_to_sell = holdings[symbol] - target_qty
-                    proceeds = shares_to_sell * prices[symbol]
-                    cash += proceeds
-                    holdings[symbol] = target_qty
-                    action_msg = f"TRIM {symbol} to {target_qty} shares - ${proceeds:.2f} proceeds"
-                    claude_actions.append(action_msg)
-                    print(f"✅ Executed: {action_msg}")
+                    if symbol in prices:
+                        proceeds = shares_to_sell * prices[symbol]
+                        cash += proceeds
+                        holdings[symbol] = target_qty
+                        action_msg = f"TRIM {symbol} to {target_qty} shares - ${proceeds:.2f} proceeds"
+                        claude_actions.append(action_msg)
+                        print(f"✅ Executed: {action_msg}")
             
             elif action == "BUY_NEW":
                 target_value = order.get("target_value", 0)
@@ -158,6 +182,7 @@ def execute_trading_decisions(holdings, prices, date, cash):
             elif action == "HOLD":
                 print(f"📊 HOLD {symbol}: {order.get('current_quantity', 0)} shares")
         
+        # Mark decisions as executed
         decisions_data["claude_decisions_executed"] = True
         decisions_data["execution_date"] = date
         decisions_data["execution_queue"] = []
@@ -166,6 +191,9 @@ def execute_trading_decisions(holdings, prices, date, cash):
         
     except FileNotFoundError:
         print("No trading decisions file found")
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error in trading_decisions.json: {e}")
+        print("Please check the JSON syntax")
     except Exception as e:
         print(f"Error executing trading decisions: {e}")
     

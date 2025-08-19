@@ -177,21 +177,13 @@
             background: #f1f2f6;
             font-weight: bold;
         }
-        
-        .daily-performance {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🚀 Micro-Cap Portfolio Challenge</h1>
-            <div class="subtitle">30-Day Trading Experiment | Target: Professional Returns</div>
+            <div class="subtitle">30-Day Trading Experiment | Tactical Rotation Strategy</div>
         </div>
         
         <div class="last-updated">
@@ -224,15 +216,8 @@
                 <div class="value" id="daily-change">0.00%</div>
             </div>
             <div class="stat-card">
-                <h3>Target Progress</h3>
-                <div class="value" id="target-progress">0.0%</div>
-            </div>
-        </div>
-        
-        <div class="daily-performance">
-            <div class="table-header">📈 Today's Performance (<span id="performance-date">2025-08-15</span>)</div>
-            <div id="daily-summary" style="padding: 20px;">
-                Loading daily performance...
+                <h3>Strategy</h3>
+                <div class="value" style="font-size: 1.2em;">TACTICAL</div>
             </div>
         </div>
         
@@ -242,33 +227,42 @@
                 <thead>
                     <tr>
                         <th>Ticker</th>
+                        <th>Company</th>
                         <th>Shares</th>
                         <th>Current Price</th>
                         <th>Position Value</th>
-                        <th>Total P&L</th>
                         <th>Allocation</th>
-                        <th>Stop Loss</th>
                     </tr>
                 </thead>
                 <tbody id="positions-table">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px;">Loading portfolio data...</td>
+                        <td colspan="6" style="text-align: center; padding: 40px;">Loading portfolio data...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         
         <div class="footer">
-            <p>🎯 Micro-Cap Portfolio Challenge | Automated tracking with Alpha Vantage API</p>
-            <p>Strategy: Concentrated positions in GEVO, FEIM, ARQ, UPXI with catalyst-driven approach</p>
+            <p>🎯 Micro-Cap Portfolio Challenge | Active Tactical Management</p>
+            <p>Strategy: Momentum rotation into SERV (Robotics), MYOMO (Medical), CABA (Biotech)</p>
         </div>
     </div>
 
     <script>
+        const companyNames = {
+            'SERV': 'Serve Robotics',
+            'MYOMO': 'Myomo Inc',
+            'CABA': 'Cabaletta Bio',
+            'ARQ': 'Arq Inc',
+            'UPXI': 'Upexi Inc',
+            'GEVO': 'Gevo Inc',
+            'FEIM': 'Frequency Electronics'
+        };
+
         async function loadPortfolioData() {
             try {
                 const timestamp = Date.now();
-                const response = await fetch(`./latest.json?v=${timestamp}`);
+                const response = await fetch(`/docs/latest.json?v=${timestamp}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -278,7 +272,6 @@
                 
                 // Update last updated time
                 document.getElementById('last-update').textContent = data.date || 'Unknown';
-                document.getElementById('performance-date').textContent = data.date || 'Unknown';
                 
                 // Show trade execution if present
                 if (data.actions && data.claude_decisions_executed) {
@@ -308,17 +301,13 @@
                 if (data.daily_changes && data.daily_changes.portfolio) {
                     const dailyChangePct = data.daily_changes.portfolio.total_change_pct || 0;
                     const dailyChangeValue = data.daily_changes.portfolio.total_change || 0;
-                    dailyChangeText = `${dailyChangePct >= 0 ? '+' : ''}${dailyChangePct.toFixed(2)}% (${dailyChangeValue >= 0 ? '+' : ''}$${Math.abs(dailyChangeValue).toFixed(2)})`;
+                    dailyChangeText = `${dailyChangePct >= 0 ? '+' : ''}${dailyChangePct.toFixed(2)}%`;
                     dailyChangeClass = dailyChangePct >= 0 ? 'value positive' : 'value negative';
                 }
                 
                 const dailyElement = document.getElementById('daily-change');
                 dailyElement.textContent = dailyChangeText;
                 dailyElement.className = dailyChangeClass;
-                
-                // Target progress (300% target)
-                const targetProgress = (totalReturn / 300) * 100;
-                document.getElementById('target-progress').textContent = `${Math.min(targetProgress, 100).toFixed(1)}%`;
                 
                 // Challenge progress
                 const startDate = new Date('2025-08-08');
@@ -332,58 +321,33 @@
                 document.getElementById('days-remaining').textContent = daysRemaining;
                 document.getElementById('progress-bar').style.width = `${Math.min(progressPercent, 100)}%`;
                 
-                // Daily performance summary
-                let dailySummaryHTML = "";
-                if (data.daily_changes && data.daily_changes.individual) {
-                    const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
-                    symbols.forEach(symbol => {
-                        const change = data.daily_changes.individual[symbol];
-                        if (change && data.quantities[symbol] > 0) {
-                            const changeClass = change.price_change_pct >= 0 ? 'positive' : 'negative';
-                            const sign = change.price_change_pct >= 0 ? '+' : '';
-                            dailySummaryHTML += `
-                                <div style="display: inline-block; margin: 10px 20px;">
-                                    <strong>${symbol}</strong><br>
-                                    <span class="${changeClass}">${sign}$${change.price_change.toFixed(2)} (${sign}${change.price_change_pct.toFixed(1)}%)</span><br>
-                                    <small>Value: ${sign}$${Math.abs(change.value_change).toFixed(2)}</small>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-                document.getElementById('daily-summary').innerHTML = dailySummaryHTML || "No daily performance data available";
-                
                 // Update positions table
                 const tableBody = document.getElementById('positions-table');
                 tableBody.innerHTML = '';
                 
-                const symbols = ['GEVO', 'FEIM', 'ARQ', 'UPXI'];
-                const stopLosses = {GEVO: 0.95, FEIM: 26.50, ARQ: 5.80, UPXI: 4.75};
-                const buyPrices = {GEVO: 1.18, FEIM: 29.53, ARQ: 6.62, UPXI: 6.04};
-                
-                symbols.forEach(symbol => {
-                    const price = data.prices[symbol];
-                    const shares = data.quantities[symbol];
-                    const value = parseFloat(data.values[symbol]) || 0;
-                    
-                    if (price && shares > 0) {
-                        const buyPrice = buyPrices[symbol];
-                        const pnl = ((price - buyPrice) / buyPrice) * 100;
-                        const allocation = (value / currentValue) * 100;
-                        const stopLoss = stopLosses[symbol];
+                // Add stock positions
+                if (data.quantities) {
+                    Object.keys(data.quantities).forEach(symbol => {
+                        const shares = data.quantities[symbol];
+                        const price = data.prices[symbol];
+                        const value = parseFloat(data.values[symbol]) || 0;
                         
-                        const row = tableBody.insertRow();
-                        row.innerHTML = `
-                            <td class="ticker">${symbol}</td>
-                            <td>${shares.toLocaleString()}</td>
-                            <td>$${price.toFixed(4)}</td>
-                            <td>$${value.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-                            <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)}%</td>
-                            <td>${allocation.toFixed(1)}%</td>
-                            <td>$${stopLoss.toFixed(2)}</td>
-                        `;
-                    }
-                });
+                        if (shares > 0 && price) {
+                            const allocation = (value / currentValue) * 100;
+                            const companyName = companyNames[symbol] || symbol;
+                            
+                            const row = tableBody.insertRow();
+                            row.innerHTML = `
+                                <td class="ticker">${symbol}</td>
+                                <td>${companyName}</td>
+                                <td>${shares.toLocaleString()}</td>
+                                <td>$${price.toFixed(4)}</td>
+                                <td>$${value.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                                <td>${allocation.toFixed(1)}%</td>
+                            `;
+                        }
+                    });
+                }
                 
                 // Add cash row if there's cash
                 if (cash > 0) {
@@ -392,19 +356,24 @@
                     cashRow.className = 'cash-row';
                     cashRow.innerHTML = `
                         <td class="ticker">💵 CASH</td>
+                        <td>Cash Position</td>
                         <td>-</td>
                         <td>$1.0000</td>
                         <td>$${cash.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-                        <td class="positive">0.00%</td>
                         <td>${cashAllocation.toFixed(1)}%</td>
-                        <td>-</td>
                     `;
+                }
+                
+                // If no positions, show empty state
+                if (tableBody.children.length === 0) {
+                    const emptyRow = tableBody.insertRow();
+                    emptyRow.innerHTML = '<td colspan="6" style="text-align: center; padding: 40px;">No positions found</td>';
                 }
                 
             } catch (error) {
                 console.error('Failed to load portfolio data:', error);
                 document.getElementById('positions-table').innerHTML = 
-                    '<tr><td colspan="7" style="text-align: center; color: #e74c3c;">Failed to load data</td></tr>';
+                    '<tr><td colspan="6" style="text-align: center; color: #e74c3c;">Failed to load data</td></tr>';
             }
         }
         

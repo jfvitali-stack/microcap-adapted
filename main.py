@@ -218,14 +218,26 @@ def main():
         with open("data/holdings.json", "r") as f:
             holdings = json.load(f)
     except FileNotFoundError:
-        holdings = {symbol: 0 for symbol in SYMBOLS}
+        # Initialize with your current portfolio from August 18
+        print("🔧 Initializing holdings with current portfolio...")
+        holdings = {
+            "GEVO": 199,
+            "FEIM": 10, 
+            "ARQ": 37,
+            "UPXI": 17,
+            "SERV": 0,
+            "MYOMO": 0,
+            "CABA": 0
+        }
     
     try:
         with open("data/cash.json", "r") as f:
             cash_data = json.load(f)
             cash = cash_data.get("cash", 0.0)
     except FileNotFoundError:
-        cash = 0.0
+        # Initialize with your current cash from August 18
+        print("🔧 Initializing cash with current amount...")
+        cash = 180.00
     
     prices = {}
     for symbol in SYMBOLS:

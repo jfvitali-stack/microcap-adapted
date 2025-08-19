@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-08-18T22:00:00Z",
-  "decision_date": "2025-08-18",
+  "last_updated": "2025-08-19T22:00:00Z",
+  "decision_date": "2025-08-19",
   "decision_type": "TACTICAL_ROTATION",
   "analyst": "Claude Sonnet 4",
   "rationale": "Portfolio declined from +33% to +18.7% over 5 days in 30-day experiment. Executing tactical rotation from failing positions into momentum micro-caps with near-term catalysts.",
@@ -22,6 +22,24 @@
       "trigger_price": null,
       "order_type": "MARKET",
       "status": "PENDING"
+    },
+    {
+      "symbol": "ARQ",
+      "action": "HOLD",
+      "current_quantity": 37,
+      "target_quantity": 37,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
+    },
+    {
+      "symbol": "UPXI",
+      "action": "HOLD",
+      "current_quantity": 17,
+      "target_quantity": 17,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "status": "ACTIVE"
     },
     {
       "symbol": "SERV",

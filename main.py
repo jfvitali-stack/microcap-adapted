@@ -174,22 +174,14 @@ def execute_trading_decisions(holdings, prices, date, cash):
 def main():
     SYMBOLS = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
     
-    # Try multiple possible environment variable names
-    API_KEY = (os.environ.get("ALPHA_VANTAGE_API_KEY") or 
-               os.environ.get("ALPHA_VANTAGE_KEY") or 
-               os.environ.get("ALPHAVANTAGE_API_KEY") or
-               os.environ.get("AV_API_KEY"))
+    # Use the correct environment variable name
+    API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY")
     
     if not API_KEY:
-        print("Error: No Alpha Vantage API key found. Checked:")
-        print("- ALPHA_VANTAGE_API_KEY")
-        print("- ALPHA_VANTAGE_KEY") 
-        print("- ALPHAVANTAGE_API_KEY")
-        print("- AV_API_KEY")
-        print(f"Available env vars: {list(os.environ.keys())}")
+        print("Error: ALPHAVANTAGE_API_KEY environment variable not set")
         return 1
     
-    print(f"Using API key: {API_KEY[:8]}...")
+    print(f"✅ Using API key: {API_KEY[:8]}...")
     
     os.makedirs("data", exist_ok=True)
     os.makedirs("docs", exist_ok=True)

@@ -1,50 +1,82 @@
 {
-  "last_updated": "2025-08-15T21:00:00Z",
-  "decision_date": "2025-08-15",
-  "decision_type": "DEFENSIVE_REBALANCING",
-  "analyst": "Claude Sonnet 4",
-  "rationale": "Two consecutive days of benchmark underperformance (-3.9%, -1.58%) with excessive GEVO concentration at 43.8%. Implementing defensive positioning while maintaining selective micro-cap exposure.",
-  "execution_queue": [
-    {
-      "symbol": "GEVO",
-      "action": "TRIM_TO",
-      "current_quantity": 299,
-      "target_quantity": 199,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    },
-    {
-      "symbol": "FEIM",
-      "action": "HOLD",
-      "current_quantity": 10,
-      "target_quantity": 10,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "ACTIVE"
-    },
-    {
-      "symbol": "ARQ",
-      "action": "HOLD",
-      "current_quantity": 37,
-      "target_quantity": 37,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "ACTIVE"
-    },
-    {
-      "symbol": "UPXI",
-      "action": "HOLD",
-      "current_quantity": 17,
-      "target_quantity": 17,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "ACTIVE"
-    }
-  ],
-  "expected_proceeds": "~$184",
-  "risk_management": {
-    "max_position_size": 35,
-    "target_cash_buffer": 15
-  }
+“last_updated”: “2025-08-18T22:00:00Z”,
+“decision_date”: “2025-08-18”,
+“decision_type”: “TACTICAL_ROTATION”,
+“analyst”: “Claude Sonnet 4”,
+“rationale”: “Portfolio declined from +33% to +18.7% over 5 days in 30-day experiment. Executing tactical rotation from failing positions into momentum micro-caps with near-term catalysts.”,
+“execution_queue”: [
+{
+“symbol”: “GEVO”,
+“action”: “SELL_ALL”,
+“current_quantity”: 199,
+“target_quantity”: 0,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “PENDING”
+},
+{
+“symbol”: “FEIM”,
+“action”: “SELL_ALL”,
+“current_quantity”: 10,
+“target_quantity”: 0,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “PENDING”
+},
+{
+“symbol”: “ARQ”,
+“action”: “HOLD”,
+“current_quantity”: 37,
+“target_quantity”: 37,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “ACTIVE”
+},
+{
+“symbol”: “UPXI”,
+“action”: “HOLD”,
+“current_quantity”: 17,
+“target_quantity”: 17,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “ACTIVE”
+},
+{
+“symbol”: “SERV”,
+“action”: “BUY_NEW”,
+“current_quantity”: 0,
+“target_value”: 275,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “PENDING”
+},
+{
+“symbol”: “MYOMO”,
+“action”: “BUY_NEW”,
+“current_quantity”: 0,
+“target_value”: 235,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “PENDING”
+},
+{
+“symbol”: “CABA”,
+“action”: “BUY_NEW”,
+“current_quantity”: 0,
+“target_value”: 200,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“status”: “PENDING”
+}
+],
+“expected_proceeds”: 618,
+“total_deployment”: 710,
+“new_strategy”: “MOMENTUM_MICROCAP_ROTATION”,
+“target_allocations”: {
+“SERV”: 35,
+“MYOMO”: 30,
+“CABA”: 25,
+“ARQ”: 7,
+“UPXI”: 3
+}
 }

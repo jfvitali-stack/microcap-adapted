@@ -1,61 +1,29 @@
 {
   "date": "2025-08-19",
-  "cash": "88.00",
-  "total_value": "1172.52",
+  "cash": "99.04",
+  "total_value": "1181.79",
   "prices": {
+    "ARQ": 7.19,
+    "UPXI": 6.92,
     "SERV": 10.26,
     "MYOMO": 1.12,
-    "CABA": 1.77,
-    "ARQ": 7.19,
-    "UPXI": 6.92
+    "CABA": 1.77
   },
   "quantities": {
+    "ARQ": 37,
+    "UPXI": 17,
     "SERV": 26,
     "MYOMO": 209,
-    "CABA": 113,
-    "ARQ": 37,
-    "UPXI": 17
+    "CABA": 112
   },
   "values": {
-    "SERV": "266.76",
-    "MYOMO": "234.08", 
-    "CABA": "200.01",
     "ARQ": "266.03",
-    "UPXI": "117.64"
+    "UPXI": "117.64",
+    "SERV": "266.76",
+    "MYOMO": "234.08",
+    "CABA": "198.24"
   },
-  "actions": "TACTICAL ROTATION: Bought SERV (26 shares), MYOMO (209 shares), CABA (113 shares)",
-  "daily_changes": {
-    "individual": {
-      "SERV": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
-      },
-      "MYOMO": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
-      },
-      "CABA": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
-      },
-      "ARQ": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
-      },
-      "UPXI": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
-      }
-    },
-    "portfolio": {
-      "total_change": 0.0,
-      "total_change_pct": 0.0
-    }
-  },
-  "claude_decisions_executed": true
+  "actions": null,
+  "daily_changes": null,
+  "claude_decisions_executed": false
 }

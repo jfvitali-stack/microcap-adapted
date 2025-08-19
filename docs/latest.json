@@ -23,7 +23,7 @@
     "MYOMO": "234.08",
     "CABA": "198.24"
   },
-  "actions": "SELL ALL GEVO: 199 shares @ $1.6800 = $334.32",
+  "actions": null,
   "daily_changes": null,
-  "claude_decisions_executed": true
+  "claude_decisions_executed": false
 }

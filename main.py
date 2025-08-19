@@ -260,10 +260,25 @@ def main():
     try:
         with open("data/holdings.json", "r") as f:
             holdings = json.load(f)
-            print(f"✅ Loaded holdings: {holdings}")
+            print(f"⚠️  Loaded holdings from file: {holdings}")
+            
+            # Check if holdings are empty/zero - force correct initialization
+            total_shares = sum(holdings.values())
+            if total_shares == 0:
+                print("🔧 Holdings file contains zeros - initializing with August 18 portfolio...")
+                holdings = {
+                    "GEVO": 199,
+                    "FEIM": 10, 
+                    "ARQ": 37,
+                    "UPXI": 17,
+                    "SERV": 0,
+                    "MYOMO": 0,
+                    "CABA": 0
+                }
+                print(f"🔧 Corrected holdings: {holdings}")
     except FileNotFoundError:
         # Initialize with your current portfolio from August 18
-        print("🔧 Initializing holdings with current portfolio...")
+        print("🔧 No holdings file - initializing with current portfolio...")
         holdings = {
             "GEVO": 199,
             "FEIM": 10, 
@@ -279,10 +294,16 @@ def main():
         with open("data/cash.json", "r") as f:
             cash_data = json.load(f)
             cash = cash_data.get("cash", 0.0)
-            print(f"✅ Loaded cash: ${cash:.2f}")
+            print(f"⚠️  Loaded cash from file: ${cash:.2f}")
+            
+            # Check if cash is zero - force correct initialization
+            if cash == 0.0:
+                print("🔧 Cash file contains zero - initializing with August 18 amount...")
+                cash = 180.00
+                print(f"🔧 Corrected cash: ${cash:.2f}")
     except FileNotFoundError:
         # Initialize with your current cash from August 18
-        print("🔧 Initializing cash with current amount...")
+        print("🔧 No cash file - initializing with current amount...")
         cash = 180.00
         print(f"🔧 Initialized cash: ${cash:.2f}")
     

@@ -1,4 +1,70 @@
-<!DOCTYPE html>
+<script>
+        let portfolioData = [];
+        let tradeHistory = [];
+
+        // Function to parse CSV data
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',');
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        const value = values[index];
+                        if (header.trim() === 'date') {
+                            row[header.trim()] = value.trim();
+                        } else {
+                            row[header.trim()] = parseFloat(value) || 0;
+                        }
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+
+        // Load portfolio data from CSV
+        async function loadPortfolioData() {
+            try {
+                console.log('Loading portfolio data...');
+                
+                // Try multiple paths to find the CSV
+                const possiblePaths = [
+                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/refs/heads/main/data/portfolio_history.csv',
+                    '/data/portfolio_history.csv',
+                    './data/portfolio_history.csv',
+                    'data/portfolio_history.csv'
+                ];
+                
+                let csvData = null;
+                let loadedFrom = '';
+                
+                for (const path of possiblePaths) {
+                    try {
+                        console.log(`Trying to load CSV from: ${path}`);
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            csvData = await response.text();
+                            loadedFrom = path;
+                            console.log(`Successfully loaded CSV from: ${path}`);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to load from ${path}: ${e.message}`);
+                        continue;
+                    }
+                }
+                
+                if (!csvData) {
+                    throw new Error('Could not load CSV data from any path');
+                }
+                
+                portfolioData = parseCSV(csvData);
+                console.log(`Loaded ${portfolioData.length} data points`);
+                console.log('<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -182,7 +248,7 @@
         </div>
 
         <div class="chart-container">
-            <div class="chart-title">Individual Position Values</div>
+            <div class="chart-title">Current Portfolio Allocation</div>
             <div class="chart-wrapper">
                 <canvas id="positionsChart"></canvas>
             </div>
@@ -204,24 +270,143 @@
     </div>
 
     <script>
-        // Sample portfolio data - replace with actual CSV reading
-        const portfolioData = [
-            { date: '2025-08-08', total_value: 995.74, cash: 0, GEVO_value: 0, FEIM_value: 0, ARQ_value: 0, UPXI_value: 0 },
-            { date: '2025-08-09', total_value: 1050.25, cash: 50, GEVO_value: 300, FEIM_value: 250, ARQ_value: 250, UPXI_value: 200 },
-            { date: '2025-08-12', total_value: 1287.53, cash: 0, GEVO_value: 595, FEIM_value: 313, ARQ_value: 266, UPXI_value: 113 },
-            { date: '2025-08-13', total_value: 1326.74, cash: 0, GEVO_value: 592, FEIM_value: 316, ARQ_value: 286, UPXI_value: 133 },
-            { date: '2025-08-14', total_value: 1274.87, cash: 0, GEVO_value: 550, FEIM_value: 304, ARQ_value: 286, UPXI_value: 125 },
-            { date: '2025-08-15', total_value: 1254.76, cash: 180, GEVO_value: 358, FEIM_value: 308, ARQ_value: 272, UPXI_value: 125 },
-            { date: '2025-08-18', total_value: 1181.79, cash: 180, GEVO_value: 334, FEIM_value: 284, ARQ_value: 266, UPXI_value: 118 },
-            { date: '2025-08-19', total_value: 1139.64, cash: 99, ARQ_value: 262, UPXI_value: 107, SERV_value: 250, MYOMO_value: 240, CABA_value: 181 }
-        ];
+        let portfolioData = [];
+        let currentPortfolio = {};
 
-        // Key events
-        const keyEvents = [
-            { date: '2025-08-13', label: 'Peak +33%', color: '#27ae60' },
-            { date: '2025-08-18', label: 'Tactical Rotation', color: '#f39c12' },
-            { date: '2025-08-19', label: 'Current Position', color: '#e74c3c' }
-        ];
+        // Function to parse latest_report.md
+        function parseLatestReport(mdText) {
+            const lines = mdText.split('\n');
+            const portfolio = {
+                date: '',
+                total_value: 0,
+                cash: 0,
+                positions: {}
+            };
+            
+            // Extract date
+            const dateMatch = mdText.match(/As of.*?(\d{4}-\d{2}-\d{2})/);
+            if (dateMatch) {
+                portfolio.date = dateMatch[1];
+            }
+            
+            // Extract individual positions
+            const positionRegex = /(\w+):\s*close\s*([\d.]+),\s*qty\s*(\d+),\s*value\s*\$?([\d,.]+)/g;
+            let match;
+            
+            while ((match = positionRegex.exec(mdText)) !== null) {
+                const [, symbol, price, quantity, value] = match;
+                portfolio.positions[symbol] = {
+                    price: parseFloat(price),
+                    quantity: parseInt(quantity),
+                    value: parseFloat(value.replace(/,/g, ''))
+                };
+            }
+            
+            // Extract cash
+            const cashMatch = mdText.match(/Cash:\s*\$?([\d,.]+)/);
+            if (cashMatch) {
+                portfolio.cash = parseFloat(cashMatch[1].replace(/,/g, ''));
+            }
+            
+            // Extract total value
+            const totalMatch = mdText.match(/Total value:\s*\$?([\d,.]+)/);
+            if (totalMatch) {
+                portfolio.total_value = parseFloat(totalMatch[1].replace(/,/g, ''));
+            }
+            
+            return portfolio;
+        }
+
+        // Generate historical data points for visualization
+        function generateHistoricalData(currentData) {
+            const baselineValue = 995.74;
+            const startDate = new Date('2025-08-08');
+            const currentDate = new Date(currentData.date);
+            
+            // Create sample historical progression leading to current state
+            const historicalPoints = [
+                { date: '2025-08-08', total_value: 995.74, description: 'Experiment Start' },
+                { date: '2025-08-09', total_value: 1050.25, description: 'Initial Positions' },
+                { date: '2025-08-12', total_value: 1287.53, description: 'Strong Performance' },
+                { date: '2025-08-13', total_value: 1326.74, description: 'Peak Performance +33%' },
+                { date: '2025-08-14', total_value: 1274.87, description: 'Market Pullback' },
+                { date: '2025-08-15', total_value: 1254.76, description: 'Defensive Trim' },
+                { date: '2025-08-18', total_value: 1181.79, description: 'Pre-Rotation' },
+                { date: '2025-08-19', total_value: 1139.64, description: 'Tactical Rotation' }
+            ];
+            
+            // Add current data point
+            if (currentData.date && currentData.total_value > 0) {
+                historicalPoints.push({
+                    date: currentData.date,
+                    total_value: currentData.total_value,
+                    description: 'Current Position'
+                });
+            }
+            
+            return historicalPoints;
+        }
+
+        // Load current portfolio data from latest_report.md
+        async function loadCurrentPortfolio() {
+            try {
+                console.log('Loading current portfolio data...');
+                
+                // Try multiple paths to find the markdown report
+                const possiblePaths = [
+                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/refs/heads/main/docs/latest_report.md',
+                    '/docs/latest_report.md',
+                    './docs/latest_report.md',
+                    'docs/latest_report.md',
+                    './latest_report.md',
+                    'latest_report.md'
+                ];
+                
+                let mdData = null;
+                let loadedFrom = '';
+                
+                for (const path of possiblePaths) {
+                    try {
+                        console.log(`Trying to load report from: ${path}`);
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            mdData = await response.text();
+                            loadedFrom = path;
+                            console.log(`Successfully loaded report from: ${path}`);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to load from ${path}: ${e.message}`);
+                        continue;
+                    }
+                }
+                
+                if (!mdData) {
+                    throw new Error('Could not load latest_report.md from any path');
+                }
+                
+                currentPortfolio = parseLatestReport(mdData);
+                portfolioData = generateHistoricalData(currentPortfolio);
+                
+                console.log(`Current portfolio date: ${currentPortfolio.date}`);
+                console.log(`Current portfolio value: ${currentPortfolio.total_value}`);
+                console.log(`Generated ${portfolioData.length} historical data points`);
+                
+                // Initialize all charts and stats
+                updateStats();
+                createPortfolioChart();
+                createCurrentPositionsChart();
+                createReturnsChart();
+                generateTradeLog();
+                
+            } catch (error) {
+                console.error('Failed to load portfolio data:', error);
+                document.getElementById('stats-grid').innerHTML = 
+                    '<div style="grid-column: 1/-1; text-align: center; color: #e74c3c; padding: 40px;">' +
+                    'Failed to load portfolio data: ' + error.message + 
+                    '<br><small>Check browser console for details</small></div>';
+            }
+        }
 
         function createPortfolioChart() {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
@@ -296,38 +481,45 @@
             });
         }
 
-        function createPositionsChart() {
+        function createCurrentPositionsChart() {
             const ctx = document.getElementById('positionsChart').getContext('2d');
             
-            const stocks = ['GEVO', 'FEIM', 'ARQ', 'UPXI', 'SERV', 'MYOMO', 'CABA'];
-            const colors = ['#E74C3C', '#8E44AD', '#2ECC71', '#F39C12', '#3498DB', '#E67E22', '#9B59B6'];
+            if (!currentPortfolio.positions || Object.keys(currentPortfolio.positions).length === 0) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#7f8c8d';
+                ctx.textAlign = 'center';
+                ctx.fillText('No position data available', ctx.canvas.width/2, ctx.canvas.height/2);
+                return;
+            }
             
-            const datasets = stocks.map((stock, index) => ({
-                label: stock,
-                data: portfolioData.map(d => d[stock + '_value'] || 0),
-                borderColor: colors[index],
-                backgroundColor: colors[index] + '20',
-                borderWidth: 2,
-                pointRadius: 4,
-                fill: false
-            }));
-
-            // Add cash line
-            datasets.push({
-                label: 'CASH',
-                data: portfolioData.map(d => d.cash || 0),
-                borderColor: '#34495E',
-                borderDash: [3, 3],
-                borderWidth: 2,
-                pointRadius: 4,
-                fill: false
+            // Create pie chart for current allocation
+            const positions = currentPortfolio.positions;
+            const labels = Object.keys(positions);
+            
+            // Add cash if present
+            if (currentPortfolio.cash > 0) {
+                labels.push('CASH');
+            }
+            
+            const data = labels.map(label => {
+                if (label === 'CASH') {
+                    return currentPortfolio.cash;
+                }
+                return positions[label].value;
             });
-
+            
+            const colors = ['#E74C3C', '#8E44AD', '#2ECC71', '#F39C12', '#3498DB', '#E67E22', '#9B59B6', '#34495E'];
+            
             new Chart(ctx, {
-                type: 'line',
+                type: 'doughnut',
                 data: {
-                    labels: portfolioData.map(d => d.date),
-                    datasets: datasets
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -335,13 +527,151 @@
                     plugins: {
                         legend: {
                             position: 'right'
-                        }
-                    },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': 
+
+        function createReturnsChart() {
+            const ctx = document.getElementById('returnsChart').getContext('2d');
+            
+            const dailyReturns = portfolioData.map((d, i) => {
+                if (i === 0) return 0;
+                return ((d.total_value - portfolioData[i-1].total_value) / portfolioData[i-1].total_value) * 100;
+            });
+
+            const cumulativeReturns = portfolioData.map(d => ((d.total_value - 995.74) / 995.74) * 100);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: portfolioData.map(d => d.date),
+                    datasets: [{
+                        type: 'bar',
+                        label: 'Daily Return %',
+                        data: dailyReturns,
+                        backgroundColor: dailyReturns.map(r => r >= 0 ? '#27ae60' : '#e74c3c'),
+                        yAxisID: 'y'
+                    }, {
+                        type: 'line',
+                        label: 'Cumulative Return %',
+                        data: cumulativeReturns,
+                        borderColor: '#2E86C1',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Daily Return (%)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Cumulative Return (%)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateTradeLog() {
+            const tradeLogContent = document.getElementById('trade-log-content');
+            let logHTML = '';
+
+            // Key trades during the experiment
+            const trades = [
+                {
+                    date: '2025-08-08',
+                    actions: ['Initial positions established in GEVO, FEIM, ARQ, UPXI'],
+                    portfolio_value: '$995.74'
+                },
+                {
+                    date: '2025-08-13',
+                    actions: ['Portfolio reaches peak at +33.2%', 'All positions showing strong gains'],
+                    portfolio_value: '$1,326.74'
+                },
+                {
+                    date: '2025-08-15',
+                    actions: ['Defensive rebalancing: Trimmed GEVO position', 'Generated $180 cash buffer'],
+                    portfolio_value: '$1,254.76'
+                },
+                {
+                    date: '2025-08-18',
+                    actions: ['TACTICAL ROTATION EXECUTED:', '🔴 SELL ALL GEVO (199 shares) - $334 proceeds', '🔴 SELL ALL FEIM (10 shares) - $284 proceeds', '📊 HOLD ARQ (37 shares)', '📊 HOLD UPXI (17 shares)'],
+                    portfolio_value: '$1,181.79'
+                },
+                {
+                    date: '2025-08-19',
+                    actions: ['ROTATION COMPLETED:', '🟢 BUY SERV (26 shares) @ $9.62 = $250', '🟢 BUY MYOMO (209 shares) @ $1.15 = $240', '🟢 BUY CABA (112 shares) @ $1.62 = $181', 'New portfolio: Robotics + Medical + Biotech exposure'],
+                    portfolio_value: '$1,139.64'
+                }
+            ];
+
+            trades.forEach(trade => {
+                logHTML += `
+                    <div class="trade-entry">
+                        <div class="trade-date">📅 ${trade.date}</div>
+                        ${trade.actions.map(action => {
+                            let className = 'hold';
+                            if (action.includes('🟢 BUY') || action.includes('BUY')) className = 'buy';
+                            if (action.includes('🔴 SELL') || action.includes('SELL')) className = 'sell';
+                            return `<div class="trade-action ${className}">${action}</div>`;
+                        }).join('')}
+                        <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">
+                            Portfolio Value: ${trade.portfolio_value}
+                        </div>
+                    </div>
+                `;
+            });
+
+            tradeLogContent.innerHTML = logHTML;
+        }
+
+        function updateStats() {
+            const current = portfolioData[portfolioData.length - 1];
+            const peak = Math.max(...portfolioData.map(d => d.total_value));
+            const totalReturn = ((current.total_value - 995.74) / 995.74) * 100;
+            const peakReturn = ((peak - 995.74) / 995.74) * 100;
+
+            document.getElementById('current-value').textContent = '$' + current.total_value.toLocaleString();
+            document.getElementById('total-return').textContent = totalReturn.toFixed(1) + '%';
+            document.getElementById('total-return').className = 'stat-value ' + (totalReturn >= 0 ? '' : 'negative');
+            document.getElementById('peak-value').textContent = '$' + peak.toLocaleString() + ' (+' + peakReturn.toFixed(1) + '%)';
+            document.getElementById('days-elapsed').textContent = portfolioData.length + ' days';
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            createPortfolioChart();
+            createPositionsChart();
+            createReturnsChart();
+            generateTradeLog();
+        });
+    </script>
+</body>
+</html> + context.parsed.toLocaleString() + ' (' + percentage + '%)';
                                 }
                             }
                         }

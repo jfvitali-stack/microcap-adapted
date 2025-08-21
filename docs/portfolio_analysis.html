@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Micro-Cap Portfolio Performance Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -49,6 +49,12 @@
             text-align: center;
             box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
         }
+        .stat-card.positive {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+        .stat-card.negative {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
         .stat-card h3 {
             margin: 0 0 10px 0;
             font-size: 0.9em;
@@ -72,11 +78,38 @@
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
-        .chart-card h3 {
+        .chart-card canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+        .timeline {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .timeline h3 {
             color: #2c3e50;
             margin-bottom: 20px;
             font-size: 1.3em;
             text-align: center;
+        }
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .timeline-item.milestone {
+            border-left-color: #e74c3c;
+        }
+        .timeline-item.trade {
+            border-left-color: #f39c12;
         }
         .positions-grid {
             display: grid;
@@ -102,20 +135,6 @@
             font-size: 0.9em;
             opacity: 0.9;
         }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #7f8c8d;
-            font-size: 1.2em;
-        }
-        .error {
-            background: #e74c3c;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
         .data-source {
             text-align: center;
             margin-top: 20px;
@@ -129,346 +148,281 @@
         <h1>📊 Micro-Cap Portfolio Dashboard</h1>
         <p class="subtitle">30-Day Challenge Performance Tracker</p>
         
-        <div id="loading" class="loading">
-            Loading portfolio data...
+        <div class="stats-grid">
+            <div class="stat-card" id="current-value-card">
+                <h3>Current Value</h3>
+                <p class="value" id="current-value">$1,139.64</p>
+            </div>
+            <div class="stat-card positive" id="total-return-card">
+                <h3>Total Return</h3>
+                <p class="value" id="total-return">+14.4%</p>
+            </div>
+            <div class="stat-card">
+                <h3>Days Elapsed</h3>
+                <p class="value" id="days-elapsed">13</p>
+            </div>
+            <div class="stat-card">
+                <h3>Cash Position</h3>
+                <p class="value" id="cash-position">$99.04</p>
+            </div>
         </div>
         
-        <div id="error" class="error" style="display: none;">
-            Failed to load portfolio data. Please check the data sources.
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Portfolio Value Timeline</h3>
+                <canvas id="portfolioChart" width="400" height="200"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Current Allocation</h3>
+                <canvas id="allocationChart" width="300" height="300"></canvas>
+            </div>
         </div>
         
-        <div id="dashboard" style="display: none;">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Current Value</h3>
-                    <p class="value" id="current-value">$0.00</p>
+        <div class="timeline">
+            <h3>📈 Trading Timeline</h3>
+            <div class="timeline-item">
+                <div>
+                    <strong>Aug 8:</strong> Initial Investment
+                    <div style="font-size: 0.9em; color: #7f8c8d;">Started with $995.74</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Total Return</h3>
-                    <p class="value" id="total-return">0.00%</p>
+                <div style="color: #3498db; font-weight: bold;">$995.74</div>
+            </div>
+            <div class="timeline-item milestone">
+                <div>
+                    <strong>Aug 13:</strong> Peak Performance
+                    <div style="font-size: 0.9em; color: #7f8c8d;">Reached +33.2% return</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Days Elapsed</h3>
-                    <p class="value" id="days-elapsed">0</p>
+                <div style="color: #27ae60; font-weight: bold;">$1,325.75</div>
+            </div>
+            <div class="timeline-item trade">
+                <div>
+                    <strong>Aug 15:</strong> Defensive Rebalancing
+                    <div style="font-size: 0.9em; color: #7f8c8d;">Trimmed GEVO position</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Cash Position</h3>
-                    <p class="value" id="cash-position">$0.00</p>
+                <div style="color: #f39c12; font-weight: bold;">$1,242.80</div>
+            </div>
+            <div class="timeline-item trade">
+                <div>
+                    <strong>Aug 18-19:</strong> Tactical Rotation
+                    <div style="font-size: 0.9em; color: #7f8c8d;">Sold GEVO/FEIM, bought SERV/MYOMO/CABA</div>
+                </div>
+                <div style="color: #e67e22; font-weight: bold;">$1,172.52</div>
+            </div>
+            <div class="timeline-item">
+                <div>
+                    <strong>Aug 21:</strong> Current Position
+                    <div style="font-size: 0.9em; color: #7f8c8d;">Portfolio consolidating</div>
+                </div>
+                <div style="color: #3498db; font-weight: bold;">$1,139.64</div>
+            </div>
+        </div>
+        
+        <div class="positions-grid">
+            <div class="position-card">
+                <h4>ARQ</h4>
+                <div class="details">
+                    37 shares @ $7.07<br>
+                    Value: $261.59 (23.0%)
                 </div>
             </div>
-            
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3>Portfolio Value Timeline</h3>
-                    <canvas id="portfolioChart" width="400" height="200"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Current Allocation</h3>
-                    <canvas id="allocationChart" width="300" height="300"></canvas>
+            <div class="position-card">
+                <h4>SERV</h4>
+                <div class="details">
+                    26 shares @ $9.62<br>
+                    Value: $250.12 (21.9%)
                 </div>
             </div>
-            
-            <div class="positions-grid" id="positions-grid">
-                <!-- Positions will be populated here -->
+            <div class="position-card">
+                <h4>MYOMO</h4>
+                <div class="details">
+                    209 shares @ $1.15<br>
+                    Value: $240.35 (21.1%)
+                </div>
             </div>
-            
-            <div class="data-source">
-                <p>Data last updated: <span id="last-update"></span></p>
-                <p>Source: latest.json | Strategy: Tactical Micro-Cap Rotation</p>
+            <div class="position-card">
+                <h4>CABA</h4>
+                <div class="details">
+                    112 shares @ $1.62<br>
+                    Value: $181.44 (15.9%)
+                </div>
             </div>
+            <div class="position-card">
+                <h4>UPXI</h4>
+                <div class="details">
+                    17 shares @ $6.30<br>
+                    Value: $107.10 (9.4%)
+                </div>
+            </div>
+            <div class="position-card cash">
+                <h4>💵 CASH</h4>
+                <div class="details">
+                    Available: $99.04 (8.7%)
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-source">
+            <p>Data last updated: August 21, 2025</p>
+            <p>Strategy: Tactical Micro-Cap Rotation | Target: +25-35% by Feb 2026</p>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let portfolioChart = null;
-        let allocationChart = null;
-        
-        // Starting values
-        const INITIAL_INVESTMENT = 995.74;
-        const START_DATE = new Date('2025-08-08');
-        
-        // Color schemes
-        const COLORS = [
-            '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
-            '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'
-        ];
-        
-        async function fetchPortfolioData() {
+        // Initialize charts with current data
+        function initializeCharts() {
+            console.log('Initializing charts...');
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded!');
+                document.querySelector('#portfolioChart').parentElement.innerHTML = '<p style="text-align: center; color: #e74c3c;">Charts failed to load. Please refresh the page.</p>';
+                return;
+            }
+
             try {
-                // Try multiple data sources
-                const sources = [
-                    './latest.json',
-                    './docs/latest.json',
-                    'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
-                ];
-                
-                let data = null;
-                for (const source of sources) {
-                    try {
-                        console.log(`Trying to fetch from: ${source}`);
-                        const response = await fetch(source);
-                        if (response.ok) {
-                            data = await response.json();
-                            console.log('Successfully loaded data from:', source);
-                            break;
-                        }
-                    } catch (err) {
-                        console.log(`Failed to fetch from ${source}:`, err);
-                        continue;
-                    }
+                // Portfolio timeline chart
+                const ctx1 = document.getElementById('portfolioChart');
+                if (!ctx1) {
+                    console.error('Portfolio chart canvas not found');
+                    return;
                 }
                 
-                if (!data) {
-                    throw new Error('No data source available');
-                }
-                
-                return data;
-            } catch (error) {
-                console.error('Error fetching portfolio data:', error);
-                throw error;
-            }
-        }
-        
-        function calculateDaysElapsed(startDate) {
-            const now = new Date();
-            const diffTime = Math.abs(now - startDate);
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-        
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount);
-        }
-        
-        function formatPercentage(percentage) {
-            const sign = percentage >= 0 ? '+' : '';
-            return `${sign}${percentage.toFixed(2)}%`;
-        }
-        
-        function updateStats(data) {
-            const totalValue = parseFloat(data.total_value || 0);
-            const cash = parseFloat(data.cash || 0);
-            const totalReturn = ((totalValue - INITIAL_INVESTMENT) / INITIAL_INVESTMENT * 100);
-            const daysElapsed = calculateDaysElapsed(START_DATE);
-            
-            document.getElementById('current-value').textContent = formatCurrency(totalValue);
-            document.getElementById('total-return').textContent = formatPercentage(totalReturn);
-            document.getElementById('total-return').style.color = totalReturn >= 0 ? '#27ae60' : '#e74c3c';
-            document.getElementById('days-elapsed').textContent = daysElapsed;
-            document.getElementById('cash-position').textContent = formatCurrency(cash);
-            document.getElementById('last-update').textContent = data.date || 'Unknown';
-        }
-        
-        function createPortfolioChart(data) {
-            const ctx = document.getElementById('portfolioChart').getContext('2d');
-            
-            // Generate timeline data (simplified for demo)
-            const dates = [];
-            const values = [];
-            const startDate = new Date('2025-08-08');
-            const currentDate = new Date(data.date || Date.now());
-            
-            // Create a simple timeline showing key milestones
-            const milestones = [
-                { date: '2025-08-08', value: 995.74, label: 'Start' },
-                { date: '2025-08-12', value: 1254.76, label: 'Peak +26%' },
-                { date: '2025-08-15', value: 1242.80, label: 'Defensive Trim' },
-                { date: '2025-08-18', value: 1181.79, label: 'Pre-Rotation' },
-                { date: data.date, value: parseFloat(data.total_value), label: 'Current' }
-            ];
-            
-            milestones.forEach(milestone => {
-                dates.push(milestone.date);
-                values.push(milestone.value);
-            });
-            
-            if (portfolioChart) {
-                portfolioChart.destroy();
-            }
-            
-            portfolioChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Portfolio Value',
-                        data: values,
-                        borderColor: '#3498db',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#3498db',
-                        pointBorderColor: '#2980b9',
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                console.log('Creating portfolio chart...');
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Aug 8', 'Aug 10', 'Aug 12', 'Aug 13', 'Aug 15', 'Aug 18', 'Aug 19', 'Aug 21'],
+                        datasets: [{
+                            label: 'Portfolio Value',
+                            data: [995.74, 1120.00, 1254.76, 1325.75, 1242.80, 1181.79, 1172.52, 1139.64],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#3498db',
+                            pointBorderColor: '#2980b9',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
                             }
                         },
-                        x: {
-                            display: true
-                        }
-                    }
-                }
-            });
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 900,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '
+
+        // Update days elapsed
+        function updateDaysElapsed() {
+            const startDate = new Date('2025-08-08');
+            const now = new Date();
+            const diffTime = Math.abs(now - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('days-elapsed').textContent = diffDays;
         }
-        
-        function createAllocationChart(data) {
-            const ctx = document.getElementById('allocationChart').getContext('2d');
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
             
-            const labels = [];
-            const values = [];
-            const colors = [];
-            
-            // Add stock positions
-            if (data.quantities) {
-                Object.keys(data.quantities).forEach((symbol, index) => {
-                    const quantity = data.quantities[symbol];
-                    const value = parseFloat(data.values?.[symbol] || 0);
-                    if (quantity > 0 && value > 0) {
-                        labels.push(symbol);
-                        values.push(value);
-                        colors.push(COLORS[index % COLORS.length]);
-                    }
-                });
-            }
-            
-            // Add cash if exists
-            if (data.cash && parseFloat(data.cash) > 0) {
-                labels.push('CASH');
-                values.push(parseFloat(data.cash));
-                colors.push('#f39c12');
-            }
-            
-            if (allocationChart) {
-                allocationChart.destroy();
-            }
-            
-            allocationChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: colors,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = ((value / total) * 100).toFixed(1);
-                                        return {
-                                            text: `${label} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            index: index
-                                        };
-                                    });
+            // Add a delay to ensure Chart.js is fully loaded
+            setTimeout(() => {
+                initializeCharts();
+                updateDaysElapsed();
+            }, 500);
+        });
+    </script>
+</body>
+</html> + value.toLocaleString();
+                                    }
                                 }
                             }
                         }
                     }
+                });
+                console.log('Portfolio chart created successfully');
+
+                // Allocation pie chart
+                const ctx2 = document.getElementById('allocationChart');
+                if (!ctx2) {
+                    console.error('Allocation chart canvas not found');
+                    return;
                 }
-            });
-        }
-        
-        function updatePositions(data) {
-            const grid = document.getElementById('positions-grid');
-            grid.innerHTML = '';
-            
-            // Add stock positions
-            if (data.quantities && data.values) {
-                Object.keys(data.quantities).forEach((symbol, index) => {
-                    const quantity = data.quantities[symbol];
-                    const value = parseFloat(data.values[symbol] || 0);
-                    const price = data.prices?.[symbol] || 0;
-                    
-                    if (quantity > 0 && value > 0) {
-                        const card = document.createElement('div');
-                        card.className = 'position-card';
-                        card.innerHTML = `
-                            <h4>${symbol}</h4>
-                            <div class="details">
-                                ${quantity} shares @ ${formatCurrency(price)}<br>
-                                Value: ${formatCurrency(value)}
-                            </div>
-                        `;
-                        grid.appendChild(card);
+                
+                console.log('Creating allocation chart...');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['ARQ', 'SERV', 'MYOMO', 'CABA', 'UPXI', 'CASH'],
+                        datasets: [{
+                            data: [261.59, 250.12, 240.35, 181.44, 107.10, 99.04],
+                            backgroundColor: [
+                                '#3498db',
+                                '#e74c3c', 
+                                '#2ecc71',
+                                '#f39c12',
+                                '#9b59b6',
+                                '#f39c12'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        return data.labels.map((label, index) => {
+                                            const value = data.datasets[0].data[index];
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[index],
+                                                index: index
+                                            };
+                                        });
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
-            }
-            
-            // Add cash position
-            if (data.cash && parseFloat(data.cash) > 0) {
-                const card = document.createElement('div');
-                card.className = 'position-card cash';
-                card.innerHTML = `
-                    <h4>💵 CASH</h4>
-                    <div class="details">
-                        Available: ${formatCurrency(parseFloat(data.cash))}
-                    </div>
-                `;
-                grid.appendChild(card);
-            }
-        }
-        
-        async function loadDashboard() {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('error').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'none';
-                
-                const data = await fetchPortfolioData();
-                console.log('Portfolio data loaded:', data);
-                
-                updateStats(data);
-                createPortfolioChart(data);
-                createAllocationChart(data);
-                updatePositions(data);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
+                console.log('Allocation chart created successfully');
                 
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = `Error: ${error.message}`;
+                console.error('Error creating charts:', error);
+                document.querySelector('#portfolioChart').parentElement.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading charts: ' + error.message + '</p>';
             }
         }
-        
-        // Load dashboard when page loads
-        document.addEventListener('DOMContentLoaded', loadDashboard);
-        
-        // Refresh every 5 minutes
-        setInterval(loadDashboard, 5 * 60 * 1000);
+
+        // Update days elapsed
+        function updateDaysElapsed() {
+            const startDate = new Date('2025-08-08');
+            const now = new Date();
+            const diffTime = Math.abs(now - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('days-elapsed').textContent = diffDays;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            updateDaysElapsed();
+        });
     </script>
 </body>
 </html>

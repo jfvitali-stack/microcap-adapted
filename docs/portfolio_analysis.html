@@ -466,28 +466,61 @@
     function createPositionsChart(data) {
         const ctx = document.getElementById('positionsChart').getContext('2d');
         
-        // Create dynamic timeline that includes current date
+        // Build dynamic timeline based on available data
+        const baseHistoricalDates = ['2025-08-08', '2025-08-12', '2025-08-13', '2025-08-15', '2025-08-18', '2025-08-19'];
         const currentDate = data.date || new Date().toISOString().split('T')[0];
-        const currentDateLabel = new Date(currentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         
-        const dates = ['Aug 8', 'Aug 12', 'Aug 13', 'Aug 15', 'Aug 18', 'Aug 19', currentDateLabel];
+        // Add current date if it's not already in the historical dates
+        const allDates = [...baseHistoricalDates];
+        if (!allDates.includes(currentDate)) {
+            allDates.push(currentDate);
+        }
+        
+        // Convert dates to readable labels
+        const dateLabels = allDates.map(date => {
+            const d = new Date(date);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
         const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
         
-        // Historical position values from your actual portfolio
-        const positionHistory = {
-            'GEVO': [250, 595, 592, 358, 334, 0, 0], // Sold on Aug 18
-            'FEIM': [250, 313, 316, 308, 284, 0, 0], // Sold on Aug 18
-            'ARQ': [250, 266, 286, 272, 266, 262, parseFloat(data.values?.ARQ || 263.44)],
-            'UPXI': [200, 113, 133, 125, 118, 107, parseFloat(data.values?.UPXI || 134.81)],
-            'SERV': [0, 0, 0, 0, 0, 250, parseFloat(data.values?.SERV || 252.46)], // Bought Aug 19
-            'MYOMO': [0, 0, 0, 0, 0, 240, parseFloat(data.values?.MYOMO || 247.67)], // Bought Aug 19
-            'CABA': [0, 0, 0, 0, 0, 181, parseFloat(data.values?.CABA || 181.44)], // Bought Aug 19
-            'CASH': [50, 0, 0, 180, 180, 99, parseFloat(data.cash || 99.04)]
+        // Base historical values for each date
+        const basePositionHistory = {
+            'GEVO': [250, 595, 592, 358, 334, 0], // Sold on Aug 18
+            'FEIM': [250, 313, 316, 308, 284, 0], // Sold on Aug 18
+            'ARQ': [250, 266, 286, 272, 266, 262],
+            'UPXI': [200, 113, 133, 125, 118, 107],
+            'SERV': [0, 0, 0, 0, 0, 250], // Bought Aug 19
+            'MYOMO': [0, 0, 0, 0, 0, 240], // Bought Aug 19
+            'CABA': [0, 0, 0, 0, 0, 181], // Bought Aug 19
+            'CASH': [50, 0, 0, 180, 180, 99]
         };
+        
+        // Build complete position history including current values
+        const positionHistory = {};
+        Object.keys(basePositionHistory).forEach(symbol => {
+            positionHistory[symbol] = [...basePositionHistory[symbol]];
+            
+            // Add current value if we have a new date
+            if (allDates.length > baseHistoricalDates.length) {
+                if (symbol === 'CASH') {
+                    positionHistory[symbol].push(parseFloat(data.cash || 99.04));
+                } else if (data.values && data.values[symbol]) {
+                    positionHistory[symbol].push(parseFloat(data.values[symbol]));
+                } else if (data.quantities && parseInt(data.quantities[symbol]) === 0) {
+                    // Position not held
+                    positionHistory[symbol].push(0);
+                } else {
+                    // Use last known value if no current data
+                    const lastValue = positionHistory[symbol][positionHistory[symbol].length - 1];
+                    positionHistory[symbol].push(lastValue);
+                }
+            }
+        });
         
         const datasets = [];
         
-        // Create datasets for each position
+        // Create datasets for each position that has data
         Object.keys(positionHistory).forEach((symbol, index) => {
             const values = positionHistory[symbol];
             const hasData = values.some(v => v > 0);
@@ -513,7 +546,7 @@
         positionsChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dates,
+                labels: dateLabels,
                 datasets: datasets
             },
             options: {
@@ -531,6 +564,10 @@
                                 const value = context.parsed.y;
                                 if (value === 0) return context.dataset.label + ': Not held';
                                 return context.dataset.label + ': ' + formatCurrency(value);
+                            },
+                            title: function(context) {
+                                const dateIndex = context[0].dataIndex;
+                                return `Date: ${allDates[dateIndex]}`;
                             }
                         }
                     }
@@ -546,6 +583,9 @@
                 }
             }
         });
+        
+        console.log('Position chart created with dates:', allDates);
+        console.log('Current data date:', currentDate);
     }
 
     function generateTradeLog(data) {

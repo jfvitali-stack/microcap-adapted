@@ -1,72 +1,51 @@
 {
-  "last_updated": "2025-08-19T22:00:00Z",
-  "decision_date": "2025-08-19",
-  "decision_type": "TACTICAL_ROTATION",
-  "analyst": "Claude Sonnet 4",
-  "rationale": "Portfolio declined from +33% to +18.7% over 5 days in 30-day experiment. Executing tactical rotation from failing positions into momentum micro-caps with near-term catalysts.",
-  "execution_queue": [
-    {
-      "symbol": "GEVO",
-      "action": "SELL_ALL",
-      "current_quantity": 199,
-      "target_quantity": 0,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    },
-    {
-      "symbol": "FEIM",
-      "action": "SELL_ALL",
-      "current_quantity": 10,
-      "target_quantity": 0,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    },
-    {
-      "symbol": "ARQ",
-      "action": "HOLD",
-      "current_quantity": 37,
-      "target_quantity": 37,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "ACTIVE"
-    },
-    {
-      "symbol": "UPXI",
-      "action": "HOLD",
-      "current_quantity": 17,
-      "target_quantity": 17,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "ACTIVE"
-    },
-    {
-      "symbol": "SERV",
-      "action": "BUY_NEW",
-      "current_quantity": 0,
-      "target_value": 275,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    },
-    {
-      "symbol": "MYOMO",
-      "action": "BUY_NEW",
-      "current_quantity": 0,
-      "target_value": 235,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    },
-    {
-      "symbol": "CABA",
-      "action": "BUY_NEW",
-      "current_quantity": 0,
-      "target_value": 200,
-      "trigger_price": null,
-      "order_type": "MARKET",
-      "status": "PENDING"
-    }
-  ]
+“last_updated”: “2025-08-22T16:00:00Z”,
+“decision_date”: “2025-08-22”,
+“decision_type”: “PROFIT_TAKING_REDEPLOYMENT”,
+“analyst”: “Claude Sonnet 4 - Professional Mode”,
+“rationale”: “UPXI momentum exhaustion after +25.9% surge in 2 days without clear catalyst. Professional risk management requires profit-taking on speculation and redeployment into fundamental catalyst opportunity (MYOMO Medicare reimbursement). Eliminates cash drag in 30-day challenge.”,
+“technical_analysis”: {
+“UPXI”: {
+“recent_performance”: “+25.9% in 2 days”,
+“assessment”: “Overextended - profit taking zone”,
+“action”: “TRIM 50% position”
+},
+“MYOMO”: {
+“recent_performance”: “Steady +5.81% yesterday”,
+“catalyst”: “Medicare reimbursement expansion”,
+“assessment”: “Fundamental strength - accumulation opportunity”
+}
+},
+“execution_queue”: [
+{
+“symbol”: “UPXI”,
+“action”: “TRIM”,
+“current_quantity”: 17,
+“target_quantity”: 8,
+“shares_to_sell”: 9,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“rationale”: “Lock in profits on parabolic move - professional risk management”,
+“status”: “PENDING”
+},
+{
+“symbol”: “MYOMO”,
+“action”: “ADD”,
+“current_quantity”: 209,
+“target_purchase_value”: 167,
+“expected_shares”: 140,
+“target_quantity”: 349,
+“trigger_price”: null,
+“order_type”: “MARKET”,
+“rationale”: “Deploy UPXI proceeds + cash into Medicare catalyst opportunity”,
+“status”: “PENDING”
+}
+],
+“expected_outcome”: {
+“cash_after_trades”: 0.00,
+“upxi_position”: “8 shares (~$63 value)”,
+“myomo_position”: “349 shares (~$414 value)”,
+“portfolio_allocation”: “Fully deployed - 0% cash drag”
+},
+“professional_commitment”: “All future daily assessments will include: 1) Technical analysis with volume/resistance levels, 2) Fundamental catalyst verification, 3) Risk management rationale, 4) Professional trade execution vs momentum chasing.”
 }

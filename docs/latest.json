@@ -1,12 +1,12 @@
 {
   "date": "2025-08-22",
   "cash": "99.04",
-  "total_value": "1178.86",
+  "total_value": "1187.80",
   "prices": {
-    "ARQ": 7.12,
+    "ARQ": 7.39,
     "UPXI": 7.93,
     "SERV": 9.71,
-    "MYOMO": 1.185,
+    "MYOMO": 1.18,
     "CABA": 1.62
   },
   "quantities": {
@@ -17,10 +17,10 @@
     "CABA": 112
   },
   "values": {
-    "ARQ": "263.44",
+    "ARQ": "273.43",
     "UPXI": "134.81",
     "SERV": "252.46",
-    "MYOMO": "247.67",
+    "MYOMO": "246.62",
     "CABA": "181.44"
   },
   "actions": null,

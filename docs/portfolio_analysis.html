@@ -262,26 +262,40 @@
 
     async function fetchCurrentData() {
         const sources = [
+            'docs/latest.json',
+            './docs/latest.json',
+            '/docs/latest.json',
+            'latest.json',
             './latest.json',
-            './docs/latest.json', 
+            'https://deuxfoistrois.github.io/microcap-adapted/docs/latest.json',
             'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
         ];
+        
+        let lastError = null;
         
         for (const source of sources) {
             try {
                 console.log(`Trying to fetch from: ${source}`);
-                const response = await fetch(source + '?t=' + Date.now()); // Cache busting
+                const response = await fetch(source + '?t=' + Date.now());
+                console.log(`Response status for ${source}:`, response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Successfully loaded data from:', source);
+                    console.log('Data preview:', data);
                     document.getElementById('data-source-info').textContent = source;
                     return data;
+                } else {
+                    console.log(`HTTP ${response.status} for ${source}`);
                 }
             } catch (error) {
-                console.log(`Failed to fetch from ${source}:`, error);
+                console.log(`Error fetching from ${source}:`, error.message);
+                lastError = error;
             }
         }
-        throw new Error('No data source available');
+        
+        console.log('All sources failed, using fallback data');
+        throw new Error('Could not load latest.json from /docs folder. Last error: ' + (lastError?.message || 'Unknown'));
     }
 
     function calculateDaysElapsed() {

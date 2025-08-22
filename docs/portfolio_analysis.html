@@ -480,61 +480,60 @@
     function createPositionsChart(data) {
         const ctx = document.getElementById('positionsChart').getContext('2d');
         
-        // Build dynamic timeline based on available data
-        const baseHistoricalDates = ['2025-08-08', '2025-08-12', '2025-08-13', '2025-08-15', '2025-08-18', '2025-08-19'];
-        const currentDate = data.date || new Date().toISOString().split('T')[0];
+        // Use your exact trading timeline dates
+        const exactDates = ['2025-08-08', '2025-08-12', '2025-08-13', '2025-08-15', '2025-08-18', '2025-08-19'];
+        const currentDate = data.date;
         
-        // Add current date if it's not already in the historical dates
-        const allDates = [...baseHistoricalDates];
-        if (!allDates.includes(currentDate)) {
+        // Build complete timeline including current date
+        const allDates = [...exactDates];
+        if (currentDate && !allDates.includes(currentDate)) {
             allDates.push(currentDate);
         }
         
-        // Convert dates to readable labels
+        console.log('Using exact dates:', allDates);
+        console.log('Current data date:', currentDate);
+        
+        // Convert to readable labels
         const dateLabels = allDates.map(date => {
-            const d = new Date(date);
+            const d = new Date(date + 'T12:00:00'); // Add time to avoid timezone issues
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         });
         
+        console.log('Date labels:', dateLabels);
+        
         const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
         
-        // Base historical values for each date
-        const basePositionHistory = {
-            'GEVO': [250, 595, 592, 358, 334, 0], // Sold on Aug 18
-            'FEIM': [250, 313, 316, 308, 284, 0], // Sold on Aug 18
-            'ARQ': [250, 266, 286, 272, 266, 262],
-            'UPXI': [200, 113, 133, 125, 118, 107],
-            'SERV': [0, 0, 0, 0, 0, 250], // Bought Aug 19
-            'MYOMO': [0, 0, 0, 0, 0, 240], // Bought Aug 19
-            'CABA': [0, 0, 0, 0, 0, 181], // Bought Aug 19
-            'CASH': [50, 0, 0, 180, 180, 99]
+        // Your exact position values for each key date
+        const positionHistory = {
+            'GEVO': [250, 595, 592, 358, 334, 0],  // Aug 8, 12, 13, 15, 18, 19
+            'FEIM': [250, 313, 316, 308, 284, 0],  // Sold Aug 18
+            'ARQ': [250, 266, 286, 272, 266, 262], // Continuous holding
+            'UPXI': [200, 113, 133, 125, 118, 107], // Continuous holding  
+            'SERV': [0, 0, 0, 0, 0, 250],         // Bought Aug 19
+            'MYOMO': [0, 0, 0, 0, 0, 240],        // Bought Aug 19
+            'CABA': [0, 0, 0, 0, 0, 181],         // Bought Aug 19
+            'CASH': [50, 0, 0, 180, 180, 99]      // Cash movements
         };
         
-        // Build complete position history including current values
-        const positionHistory = {};
-        Object.keys(basePositionHistory).forEach(symbol => {
-            positionHistory[symbol] = [...basePositionHistory[symbol]];
-            
-            // Add current value if we have a new date
-            if (allDates.length > baseHistoricalDates.length) {
+        // Add current values if we have a new date
+        if (allDates.length > exactDates.length) {
+            Object.keys(positionHistory).forEach(symbol => {
                 if (symbol === 'CASH') {
                     positionHistory[symbol].push(parseFloat(data.cash || 99.04));
                 } else if (data.values && data.values[symbol]) {
                     positionHistory[symbol].push(parseFloat(data.values[symbol]));
-                } else if (data.quantities && parseInt(data.quantities[symbol]) === 0) {
-                    // Position not held
-                    positionHistory[symbol].push(0);
                 } else {
-                    // Use last known value if no current data
-                    const lastValue = positionHistory[symbol][positionHistory[symbol].length - 1];
-                    positionHistory[symbol].push(lastValue);
+                    // For positions no longer held (GEVO, FEIM) or missing data
+                    positionHistory[symbol].push(0);
                 }
-            }
-        });
+            });
+        }
+        
+        console.log('Position history:', positionHistory);
         
         const datasets = [];
         
-        // Create datasets for each position that has data
+        // Create datasets only for positions with data
         Object.keys(positionHistory).forEach((symbol, index) => {
             const values = positionHistory[symbol];
             const hasData = values.some(v => v > 0);
@@ -547,8 +546,10 @@
                     backgroundColor: colors[index % colors.length] + '20',
                     borderWidth: symbol === 'CASH' ? 1 : 2,
                     borderDash: symbol === 'CASH' ? [3, 3] : [],
-                    pointRadius: 4,
-                    fill: false
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: false,
+                    tension: 0.1
                 });
             }
         });
@@ -568,7 +569,11 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right'
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -587,19 +592,33 @@
                     }
                 },
                 scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Trading Timeline'
+                        }
+                    },
                     y: {
+                        title: {
+                            display: true,
+                            text: 'Position Value ($)'
+                        },
                         ticks: {
                             callback: function(value) {
                                 return formatCurrency(value);
                             }
                         }
                     }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
             }
         });
         
-        console.log('Position chart created with dates:', allDates);
-        console.log('Current data date:', currentDate);
+        console.log('Position chart created successfully');
     }
 
     function generateTradeLog(data) {

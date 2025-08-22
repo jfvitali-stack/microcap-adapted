@@ -466,30 +466,42 @@
     function createPositionsChart(data) {
         const ctx = document.getElementById('positionsChart').getContext('2d');
         
-        // Create simplified timeline for current positions
-        const dates = ['Aug 19', 'Aug 21', 'Current'];
-        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
+        // Real historical position data for your actual experiment
+        const dates = ['Aug 8', 'Aug 12', 'Aug 13', 'Aug 15', 'Aug 18', 'Aug 19', 'Current'];
+        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+        
+        // Historical position values from your actual portfolio
+        const positionHistory = {
+            'GEVO': [250, 595, 592, 358, 334, 0, 0], // Sold on Aug 18
+            'FEIM': [250, 313, 316, 308, 284, 0, 0], // Sold on Aug 18
+            'ARQ': [250, 266, 286, 272, 266, 262, parseFloat(data.values?.ARQ || 263.44)],
+            'UPXI': [200, 113, 133, 125, 118, 107, parseFloat(data.values?.UPXI || 134.81)],
+            'SERV': [0, 0, 0, 0, 0, 250, parseFloat(data.values?.SERV || 252.46)], // Bought Aug 19
+            'MYOMO': [0, 0, 0, 0, 0, 240, parseFloat(data.values?.MYOMO || 247.67)], // Bought Aug 19
+            'CABA': [0, 0, 0, 0, 0, 181, parseFloat(data.values?.CABA || 181.44)], // Bought Aug 19
+            'CASH': [50, 0, 0, 180, 180, 99, parseFloat(data.cash || 99.04)]
+        };
+        
         const datasets = [];
         
-        if (data.quantities && data.values) {
-            Object.keys(data.quantities).forEach((symbol, index) => {
-                const quantity = parseInt(data.quantities[symbol]);
-                const value = parseFloat(data.values[symbol] || 0);
-                if (quantity > 0 && value > 0) {
-                    // Simulate some historical data for the chart
-                    const historicalValue = value * 0.95; // Approximate previous value
-                    datasets.push({
-                        label: symbol,
-                        data: [historicalValue, value * 0.98, value],
-                        borderColor: colors[index % colors.length],
-                        backgroundColor: colors[index % colors.length] + '20',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        fill: false
-                    });
-                }
-            });
-        }
+        // Create datasets for each position
+        Object.keys(positionHistory).forEach((symbol, index) => {
+            const values = positionHistory[symbol];
+            const hasData = values.some(v => v > 0);
+            
+            if (hasData) {
+                datasets.push({
+                    label: symbol,
+                    data: values,
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length] + '20',
+                    borderWidth: symbol === 'CASH' ? 1 : 2,
+                    borderDash: symbol === 'CASH' ? [3, 3] : [],
+                    pointRadius: 4,
+                    fill: false
+                });
+            }
+        });
 
         if (positionsChart) {
             positionsChart.destroy();
@@ -507,6 +519,17 @@
                 plugins: {
                     legend: {
                         position: 'right'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                if (value === 0) return context.dataset.label + ': Not held';
+                                return context.dataset.label + ': ' + formatCurrency(value);
+                            }
+                        }
                     }
                 },
                 scales: {

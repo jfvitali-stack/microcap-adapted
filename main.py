@@ -1,434 +1,306 @@
 #!/usr/bin/env python3
 
-import json
 import os
-import sys
+import json
 import requests
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime
 import pandas as pd
 
 def save_json(path, data):
-    directory = os.path.dirname(path)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
-    with open(path, "w") as f:
+    if os.path.dirname(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
         json.dump(data, f, indent=2)
 
-def load_json(path):
+def load_json(path, default=None):
+    if default is None:
+        default = {}
     try:
-        with open(path, "r") as f:
+        with open(path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        return {}
+        return default
 
-def get_alpha_vantage_price(symbol, api_key):
-    url = f"https://www.alphavantage.co/query"
-    params = {
-        "function": "GLOBAL_QUOTE",
-        "symbol": symbol,
-        "apikey": api_key
-    }
-    
+def get_stock_price(symbol, api_key):
     try:
-        response = requests.get(url, params=params)
+        url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}"
+        response = requests.get(url, timeout=30)
         data = response.json()
         
-        if "Global Quote" in data and "05. price" in data["Global Quote"]:
-            price = float(data["Global Quote"]["05. price"])
-            return price
-        elif "Error Message" in data:
-            print(f"API Error for {symbol}: {data['Error Message']}")
-            return None
-        elif "Note" in data:
-            print(f"API Limit for {symbol}: {data['Note']}")
-            return None
-        else:
-            print(f"Unexpected response for {symbol}: {data}")
-            # Try alternative ticker formats
-            if symbol == "MYOMO":
-                # Try MYO ticker
-                params["symbol"] = "MYO"
-                response = requests.get(url, params=params)
+        if 'Global Quote' in data and '05. price' in data['Global Quote']:
+            return float(data['Global Quote']['05. price'])
+        elif 'Global Quote' in data and data['Global Quote'] == {}:
+            # Try alternative ticker for MYOMO
+            if symbol == 'MYOMO':
+                url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=MYO&apikey={api_key}"
+                response = requests.get(url, timeout=30)
                 data = response.json()
-                if "Global Quote" in data and "05. price" in data["Global Quote"]:
-                    price = float(data["Global Quote"]["05. price"])
-                    print(f"Found {symbol} as MYO: ${price:.4f}")
-                    return price
-            return None
+                if 'Global Quote' in data and '05. price' in data['Global Quote']:
+                    return float(data['Global Quote']['05. price'])
+        
+        print(f"Unexpected response for {symbol}: {data}")
+        return None
+        
     except Exception as e:
         print(f"Error fetching {symbol}: {e}")
         return None
 
-def calculate_daily_changes(current_data, previous_data):
-    if not previous_data:
-        return None
-    
-    individual_changes = {}
-    for symbol in current_data["prices"]:
-        if symbol in previous_data.get("prices", {}):
-            current_price = current_data["prices"][symbol]
-            prev_price = previous_data["prices"][symbol]
-            current_qty = current_data["quantities"][symbol]
-            
-            price_change = current_price - prev_price
-            price_change_pct = (price_change / prev_price) * 100 if prev_price > 0 else 0
-            value_change = price_change * current_qty
-            
-            individual_changes[symbol] = {
-                "price_change": price_change,
-                "price_change_pct": price_change_pct,
-                "value_change": value_change
-            }
-    
-    current_total = float(current_data["total_value"])
-    prev_total = float(previous_data.get("total_value", current_total))
-    
-    total_change = current_total - prev_total
-    total_change_pct = (total_change / prev_total) * 100 if prev_total > 0 else 0
-    
-    return {
-        "individual": individual_changes,
-        "portfolio": {
-            "total_change": total_change,
-            "total_change_pct": total_change_pct
-        }
-    }
-
-def get_previous_day_data():
-    try:
-        if not os.path.exists("data/portfolio_history.csv"):
-            print("No portfolio history CSV found")
-            return None
-            
-        df = pd.read_csv("data/portfolio_history.csv")
-        if len(df) < 1:
-            print("Portfolio history CSV is empty")
-            return None
-            
-        if len(df) >= 2:
-            # Get second to last row (previous day)
-            prev_row = df.iloc[-2]
-        else:
-            # If only one row, use it as baseline
-            prev_row = df.iloc[-1]
-        
-        symbols = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
-        prices = {}
-        quantities = {}
-        
-        for symbol in symbols:
-            price_col = f"{symbol}_price"
-            qty_col = f"{symbol}_qty"
-            
-            # Check if columns exist
-            if price_col in prev_row and qty_col in prev_row:
-                if pd.notna(prev_row[price_col]) and prev_row[qty_col] > 0:
-                    prices[symbol] = prev_row[price_col]
-                    quantities[symbol] = prev_row[qty_col]
-        
-        return {
-            "prices": prices,
-            "quantities": quantities,
-            "total_value": str(prev_row["total_value"]) if "total_value" in prev_row else "0"
-        }
-        
-    except Exception as e:
-        print(f"Error loading previous day data: {e}")
-        print("Continuing without daily change calculation...")
-        return None
-
 def execute_trading_decisions(holdings, prices, date, cash):
-    claude_actions = []
+    decisions_file = "trading_decisions.json"
+    
+    if not os.path.exists(decisions_file):
+        print(f"No trading decisions file found: {decisions_file}")
+        return holdings, [], cash
     
     try:
-        with open("trading_decisions.json", "r") as f:
-            content = f.read().strip()
-            if not content:
-                print("Trading decisions file is empty")
-                return holdings, claude_actions, cash
-            decisions_data = json.loads(content)
-        
-        if not decisions_data.get("execution_queue"):
-            print("No pending trading decisions")
-            return holdings, claude_actions, cash
-        
-        print("🤖 Checking Claude's trading decisions...")
-        
-        for order in decisions_data["execution_queue"]:
-            symbol = order["symbol"]
-            action = order["action"]
+        with open(decisions_file, 'r') as f:
+            decisions_data = json.load(f)
+    except Exception as e:
+        print(f"Error loading trading decisions: {e}")
+        return holdings, [], cash
+    
+    if "execution_queue" not in decisions_data:
+        print("No execution_queue found in trading decisions")
+        return holdings, [], cash
+    
+    executed_actions = []
+    
+    for trade in decisions_data["execution_queue"]:
+        if trade.get("status") != "PENDING":
+            continue
             
+        symbol = trade["symbol"]
+        action = trade["action"]
+        
+        print(f"🔄 Processing {action} {symbol}...")
+        
+        if action == "TRIM":
+            current_qty = holdings.get(symbol, 0)
+            target_qty = trade["target_quantity"]
+            shares_to_sell = current_qty - target_qty
+            
+            if shares_to_sell > 0 and current_qty > 0:
+                price = prices.get(symbol, 0)
+                proceeds = shares_to_sell * price
+                cash += proceeds
+                holdings[symbol] = target_qty
+                executed_actions.append(f"✅ TRIM {symbol}: {current_qty} → {target_qty} shares, +${proceeds:.2f} cash")
+                print(f"✅ Executed: TRIM {symbol}: {shares_to_sell} shares @ ${price:.4f} = ${proceeds:.2f}")
+            else:
+                print(f"⚠️ Cannot trim {symbol}: insufficient shares")
+                
+        elif action == "ADD":
+            target_value = trade.get("target_purchase_value", 0)
+            if target_value > 0 and cash >= target_value:
+                price = prices.get(symbol, 0)
+                if price > 0:
+                    shares_to_buy = int(target_value / price)
+                    cost = shares_to_buy * price
+                    if cost <= cash:
+                        cash -= cost
+                        holdings[symbol] = holdings.get(symbol, 0) + shares_to_buy
+                        executed_actions.append(f"✅ ADD {symbol}: +{shares_to_buy} shares @ ${price:.4f} = ${cost:.2f}")
+                        print(f"✅ Executed: ADD {symbol}: {shares_to_buy} shares @ ${price:.4f} = ${cost:.2f}")
+                    else:
+                        print(f"⚠️ Insufficient cash for {symbol}: need ${cost:.2f}, have ${cash:.2f}")
+                else:
+                    print(f"⚠️ No price available for {symbol}")
+            else:
+                print(f"⚠️ Cannot add {symbol}: insufficient cash (${cash:.2f}) for target ${target_value:.2f}")
+        
+        elif action in ["SELL_ALL", "BUY_NEW"]:
+            # Handle legacy trade formats
             if action == "SELL_ALL":
-                if symbol in holdings and holdings[symbol] > 0:
-                    shares_to_sell = holdings[symbol]
-                    if symbol in prices:
-                        proceeds = shares_to_sell * prices[symbol]
-                        cash += proceeds
-                        holdings[symbol] = 0
-                        action_msg = f"SELL ALL {symbol}: {shares_to_sell} shares @ ${prices[symbol]:.4f} = ${proceeds:.2f}"
-                        claude_actions.append(action_msg)
-                        print(f"✅ Executed: {action_msg}")
-            
-            elif action == "TRIM_TO":
-                target_qty = order["target_quantity"]
-                if symbol in holdings and holdings[symbol] > target_qty:
-                    shares_to_sell = holdings[symbol] - target_qty
-                    if symbol in prices:
-                        proceeds = shares_to_sell * prices[symbol]
-                        cash += proceeds
-                        holdings[symbol] = target_qty
-                        action_msg = f"TRIM {symbol} to {target_qty} shares - ${proceeds:.2f} proceeds"
-                        claude_actions.append(action_msg)
-                        print(f"✅ Executed: {action_msg}")
-            
+                current_qty = holdings.get(symbol, 0)
+                if current_qty > 0:
+                    price = prices.get(symbol, 0)
+                    proceeds = current_qty * price
+                    cash += proceeds
+                    holdings[symbol] = 0
+                    executed_actions.append(f"✅ SELL ALL {symbol}: {current_qty} shares @ ${price:.4f} = ${proceeds:.2f}")
+                    print(f"✅ Executed: SELL ALL {symbol}: {current_qty} shares @ ${price:.4f} = ${proceeds:.2f}")
+                    
             elif action == "BUY_NEW":
-                target_value = order.get("target_value", 0)
+                target_value = trade.get("target_value", 0)
                 if target_value > 0 and cash >= target_value:
-                    if symbol in prices and prices[symbol] > 0:
-                        shares_to_buy = int(target_value / prices[symbol])
-                        cost = shares_to_buy * prices[symbol]
+                    price = prices.get(symbol, 0)
+                    if price > 0:
+                        shares_to_buy = int(target_value / price)
+                        cost = shares_to_buy * price
                         if cost <= cash:
                             cash -= cost
-                            holdings[symbol] = holdings.get(symbol, 0) + shares_to_buy
-                            action_msg = f"BUY {symbol}: {shares_to_buy} shares @ ${prices[symbol]:.4f} = ${cost:.2f}"
-                            claude_actions.append(action_msg)
-                            print(f"✅ Executed: {action_msg}")
-            
-            elif action == "HOLD":
-                print(f"📊 HOLD {symbol}: {order.get('current_quantity', 0)} shares")
-        
-        # Mark decisions as executed
-        decisions_data["claude_decisions_executed"] = True
-        decisions_data["execution_date"] = date
-        decisions_data["execution_queue"] = []
-        
-        save_json("trading_decisions.json", decisions_data)
-        
-    except FileNotFoundError:
-        print("No trading decisions file found")
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error in trading_decisions.json: {e}")
-        print("Please check the JSON syntax")
-    except Exception as e:
-        print(f"Error executing trading decisions: {e}")
+                            holdings[symbol] = shares_to_buy
+                            executed_actions.append(f"✅ BUY NEW {symbol}: {shares_to_buy} shares @ ${price:.4f} = ${cost:.2f}")
+                            print(f"✅ Executed: BUY NEW {symbol}: {shares_to_buy} shares @ ${price:.4f} = ${cost:.2f}")
     
-    return holdings, claude_actions, cash
+    # Mark all trades as completed by clearing the file
+    try:
+        decisions_data["execution_queue"] = []
+        decisions_data["last_executed"] = datetime.now().isoformat()
+        save_json(decisions_file, decisions_data)
+        print("📋 Trading decisions cleared after execution")
+    except Exception as e:
+        print(f"Error clearing trading decisions: {e}")
+    
+    return holdings, executed_actions, cash
 
 def main():
-    SYMBOLS = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
-    
-    # Use the correct environment variable name
-    API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY")
-    
-    if not API_KEY:
+    # Get API key
+    api_key = os.environ.get('ALPHAVANTAGE_API_KEY')
+    if not api_key:
         print("Error: ALPHAVANTAGE_API_KEY environment variable not set")
         return 1
     
-    print(f"✅ Using API key: {API_KEY[:8]}...")
+    print(f"✅ Using API key: {api_key[:10]}...")
     
-    os.makedirs("data", exist_ok=True)
-    os.makedirs("docs", exist_ok=True)
+    # Initialize or load existing portfolio
+    holdings = load_json("data/holdings.json", {
+        "GEVO": 0, "FEIM": 0, "ARQ": 37, "UPXI": 17, "SERV": 26, "MYOMO": 209, "CABA": 112
+    })
     
-    try:
-        with open("data/holdings.json", "r") as f:
-            holdings = json.load(f)
-    except FileNotFoundError:
-        # Initialize with your current portfolio from August 18
-        print("🔧 Initializing holdings with current portfolio...")
-        holdings = {
-            "GEVO": 199,
-            "FEIM": 10, 
-            "ARQ": 37,
-            "UPXI": 17,
-            "SERV": 0,
-            "MYOMO": 0,
-            "CABA": 0
-        }
-    
-    try:
-        with open("data/cash.json", "r") as f:
-            cash_data = json.load(f)
-            cash = cash_data.get("cash", 0.0)
-    except FileNotFoundError:
-        # Initialize with your current cash from August 18
-        print("🔧 Initializing cash with current amount...")
-        cash = 180.00
+    cash = load_json("data/cash.json", {"cash": 99.04}).get("cash", 99.04)
     
     print(f"📊 Loading existing holdings and cash...")
+    print(f"✅ Loaded holdings: {holdings}")
+    print(f"✅ Loaded cash: ${cash:.2f}")
     
-    try:
-        with open("data/holdings.json", "r") as f:
-            holdings = json.load(f)
-            print(f"⚠️  Loaded holdings from file: {holdings}")
-            
-            # Check if holdings are empty/zero - force correct initialization
-            total_shares = sum(holdings.values())
-            if total_shares == 0:
-                print("🔧 Holdings file contains zeros - initializing with August 18 portfolio...")
-                holdings = {
-                    "GEVO": 199,
-                    "FEIM": 10, 
-                    "ARQ": 37,
-                    "UPXI": 17,
-                    "SERV": 0,
-                    "MYOMO": 0,
-                    "CABA": 0
-                }
-                print(f"🔧 Corrected holdings: {holdings}")
-    except FileNotFoundError:
-        # Initialize with your current portfolio from August 18
-        print("🔧 No holdings file - initializing with current portfolio...")
-        holdings = {
-            "GEVO": 199,
-            "FEIM": 10, 
-            "ARQ": 37,
-            "UPXI": 17,
-            "SERV": 0,
-            "MYOMO": 0,
-            "CABA": 0
-        }
-        print(f"🔧 Initialized holdings: {holdings}")
+    # Define all symbols
+    symbols = ["GEVO", "FEIM", "ARQ", "UPXI", "SERV", "MYOMO", "CABA"]
     
-    try:
-        with open("data/cash.json", "r") as f:
-            cash_data = json.load(f)
-            cash = cash_data.get("cash", 0.0)
-            print(f"⚠️  Loaded cash from file: ${cash:.2f}")
-            
-            # Check if cash is zero - force correct initialization
-            if cash == 0.0:
-                print("🔧 Cash file contains zero - initializing with August 18 amount...")
-                cash = 180.00
-                print(f"🔧 Corrected cash: ${cash:.2f}")
-    except FileNotFoundError:
-        # Initialize with your current cash from August 18
-        print("🔧 No cash file - initializing with current amount...")
-        cash = 180.00
-        print(f"🔧 Initialized cash: ${cash:.2f}")
-    
-    print(f"\n📈 Fetching current stock prices...")
-    
+    # Fetch current prices
+    print(f"📈 Fetching current stock prices...")
     prices = {}
-    for symbol in SYMBOLS:
+    for symbol in symbols:
         print(f"Fetching {symbol}...")
-        price = get_alpha_vantage_price(symbol, API_KEY)
+        price = get_stock_price(symbol, api_key)
         if price:
             prices[symbol] = price
             print(f"Fetched {symbol}: ${price:.4f}")
         else:
             print(f"Failed to fetch {symbol}")
     
-    print(f"\n🔄 Processing trading decisions...")
+    if not prices:
+        print("Error: No prices fetched successfully")
+        return 1
     
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    # Get current date
+    current_date = datetime.now().strftime('%Y-%m-%d')
     
+    # Execute trading decisions
+    print(f"🔄 Processing trading decisions...")
+    print(f"🤖 Checking Claude's trading decisions...")
     holdings, claude_actions, cash = execute_trading_decisions(holdings, prices, current_date, cash)
     
-    print(f"\n💰 Calculating portfolio values...")
-    print(f"Holdings after trading: {holdings}")
-    print(f"Cash after trading: ${cash:.2f}")
-    
+    # Calculate portfolio values
+    print(f"💰 Calculating portfolio values...")
     values = {}
+    quantities = {}
     total_value = cash
     
-    for symbol in SYMBOLS:
-        if symbol in holdings and symbol in prices and holdings[symbol] > 0:
-            value = holdings[symbol] * prices[symbol]
+    for symbol in symbols:
+        qty = holdings.get(symbol, 0)
+        price = prices.get(symbol, 0)
+        value = qty * price
+        
+        if qty > 0:  # Only include positions actually held
+            quantities[symbol] = qty
             values[symbol] = f"{value:.2f}"
             total_value += value
-            print(f"{symbol}: {holdings[symbol]} shares × ${prices[symbol]:.4f} = ${value:.2f}")
-        else:
-            values[symbol] = "0.00"
+            print(f"Holdings after trading: {symbol}: {qty} shares @ ${price:.4f} = ${value:.2f}")
     
-    print(f"\n💼 Total portfolio value: ${total_value:.2f}")
+    print(f"Cash after trading: ${cash:.2f}")
+    print(f"💼 Total portfolio value: ${total_value:.2f}")
     
-    previous_data = get_previous_day_data()
+    # Load previous day data for daily changes
+    previous_data = {}
+    daily_changes = {"individual": {}, "portfolio": {"total_change": 0, "total_change_pct": 0}}
     
-    current_data = {
-        "date": current_date,
-        "prices": {k: v for k, v in prices.items() if k in holdings and holdings[k] > 0},
-        "quantities": {k: v for k, v in holdings.items() if v > 0},
-        "total_value": str(total_value)
-    }
+    try:
+        previous_data = load_json("docs/latest.json")
+        if previous_data.get("total_value"):
+            prev_total = float(previous_data["total_value"])
+            total_change = total_value - prev_total
+            total_change_pct = (total_change / prev_total) * 100
+            daily_changes["portfolio"] = {
+                "total_change": total_change,
+                "total_change_pct": total_change_pct
+            }
+            print(f"Daily portfolio change: ${total_change:.2f} ({total_change_pct:.2f}%)")
+        
+        # Calculate individual stock changes
+        for symbol in quantities:
+            prev_price = previous_data.get("prices", {}).get(symbol, prices[symbol])
+            curr_price = prices[symbol]
+            price_change = curr_price - prev_price
+            price_change_pct = (price_change / prev_price) * 100 if prev_price > 0 else 0
+            value_change = quantities[symbol] * price_change
+            
+            daily_changes["individual"][symbol] = {
+                "price_change": price_change,
+                "price_change_pct": price_change_pct,
+                "value_change": value_change
+            }
+            
+    except Exception as e:
+        print(f"Error loading previous day data: {e}")
+        print("Continuing without daily change calculation...")
     
-    daily_changes = calculate_daily_changes(current_data, previous_data)
-    
-    portfolio_data = {
+    # Prepare data for JSON output
+    json_data = {
         "date": current_date,
         "cash": f"{cash:.2f}",
         "total_value": f"{total_value:.2f}",
-        "prices": {k: v for k, v in prices.items() if k in holdings and holdings[k] > 0},
-        "quantities": {k: v for k, v in holdings.items() if v > 0},
-        "values": {k: v for k, v in values.items() if k in holdings and holdings[k] > 0},
-        "actions": claude_actions[0] if claude_actions else None,
+        "prices": {symbol: prices[symbol] for symbol in symbols if symbol in prices},
+        "quantities": quantities,
+        "values": values,
+        "actions": "; ".join(claude_actions) if claude_actions else "No trades executed",
         "daily_changes": daily_changes,
-        "claude_decisions_executed": bool(claude_actions)
+        "claude_decisions_executed": len(claude_actions) > 0
     }
     
-    save_json("docs/latest.json", portfolio_data)
+    # Save all data
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("docs", exist_ok=True)
     
     save_json("data/holdings.json", holdings)
     save_json("data/cash.json", {"cash": cash})
+    save_json("docs/latest.json", json_data)
     
-    csv_row = {
-        "date": current_date,
-        "total_value": total_value,
-        "cash": cash
-    }
-    
-    for symbol in SYMBOLS:
-        csv_row[f"{symbol}_price"] = prices.get(symbol, 0)
-        csv_row[f"{symbol}_qty"] = holdings.get(symbol, 0)
-        csv_row[f"{symbol}_value"] = float(values.get(symbol, 0))
-    
-    csv_file = "data/portfolio_history.csv"
-    file_exists = os.path.isfile(csv_file)
-    
-    with open(csv_file, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=csv_row.keys())
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(csv_row)
-    
+    # Create markdown report
     report_lines = [
         "# Portfolio Report",
         f"**As of (latest close)**: {current_date}",
         ""
     ]
     
-    for symbol in SYMBOLS:
-        if symbol in holdings and holdings[symbol] > 0 and symbol in prices:
-            price = prices[symbol]
-            qty = holdings[symbol]
-            value = qty * price
-            report_lines.append(f"- {symbol}: close {price:.4f}, qty {qty}, value ${value:.2f}")
+    for symbol in quantities:
+        qty = quantities[symbol]
+        price = prices[symbol]
+        value = float(values[symbol])
+        report_lines.append(f"- {symbol}: close {price:.4f}, qty {qty}, value ${value:.2f}")
     
-    report_lines.extend([
-        "",
-        f"Cash: ${cash:.2f}",
-        f"**Total value**: ${total_value:.2f}"
-    ])
+    if cash > 0:
+        report_lines.append(f"\nCash: ${cash:.2f}")
+    
+    report_lines.append(f"**Total value**: ${total_value:.2f}")
     
     if claude_actions:
-        report_lines.extend([
-            "",
-            "## Recent Actions",
-            ""
-        ])
-        for action in claude_actions:
-            report_lines.append(f"- {action}")
+        report_lines.append(f"\n**Executed trades**: {'; '.join(claude_actions)}")
     
     with open("docs/latest_report.md", "w") as f:
         f.write("\n".join(report_lines))
     
-    print(f"\n📊 Portfolio updated successfully!")
+    print(f"📊 Portfolio updated successfully!")
     print(f"Total value: ${total_value:.2f}")
     print(f"Cash: ${cash:.2f}")
+    
     if claude_actions:
-        print(f"Claude actions executed: {len(claude_actions)}")
+        print("✅ Executed trades:")
+        for action in claude_actions:
+            print(f"  {action}")
     
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit(main())

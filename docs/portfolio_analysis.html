@@ -472,148 +472,258 @@
             });
         }
 
+        async function fetchHistoricalData() {
+            // Try to fetch historical portfolio data from your docs folder
+            const historicalSources = [
+                'docs/portfolio_history.csv',
+                'docs/historical_data.json',
+                'portfolio_history.csv'
+            ];
+            
+            let historicalData = [];
+            
+            for (const source of historicalSources) {
+                try {
+                    console.log(`Trying to fetch historical data from: ${source}`);
+                    const response = await fetch(source + '?t=' + Date.now());
+                    
+                    if (response.ok) {
+                        if (source.endsWith('.csv')) {
+                            const csvText = await response.text();
+                            historicalData = parseCSVData(csvText);
+                            console.log('Successfully loaded CSV data from:', source);
+                            break;
+                        } else if (source.endsWith('.json')) {
+                            historicalData = await response.json();
+                            console.log('Successfully loaded JSON data from:', source);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`Failed to fetch from ${source}:`, error.message);
+                }
+            }
+            
+            return historicalData;
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) return [];
+            
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].trim() : '';
+                });
+                data.push(row);
+            }
+            
+            return data;
+        }
+
         function createPositionsChart(data) {
             const ctx = document.getElementById('positionsChart').getContext('2d');
             
-            // Use your exact trading timeline dates
-            const exactDates = ['2025-08-08', '2025-08-12', '2025-08-13', '2025-08-15', '2025-08-18', '2025-08-19'];
-            const currentDate = data.date;
+            console.log('Creating positions chart with current data:', data);
             
-            // Build complete timeline including current date
-            const allDates = [...exactDates];
-            if (currentDate && !allDates.includes(currentDate)) {
-                allDates.push(currentDate);
-            }
-            
-            console.log('Using exact dates:', allDates);
-            console.log('Current data date:', currentDate);
-            
-            // Convert to readable labels
-            const dateLabels = allDates.map(date => {
-                const d = new Date(date + 'T12:00:00'); // Add time to avoid timezone issues
-                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            
-            console.log('Date labels:', dateLabels);
-            
-            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
-            
-            // Your exact position values for each key date
-            const positionHistory = {
-                'GEVO': [250, 595, 592, 358, 334, 0],  // Aug 8, 12, 13, 15, 18, 19
-                'FEIM': [250, 313, 316, 308, 284, 0],  // Sold Aug 18
-                'ARQ': [250, 266, 286, 272, 266, 262], // Continuous holding
-                'UPXI': [200, 113, 133, 125, 118, 107], // Continuous holding  
-                'SERV': [0, 0, 0, 0, 0, 250],         // Bought Aug 19
-                'MYOMO': [0, 0, 0, 0, 0, 240],        // Bought Aug 19
-                'CABA': [0, 0, 0, 0, 0, 181],         // Bought Aug 19
-                'CASH': [50, 0, 0, 180, 180, 99]      // Cash movements
-            };
-            
-            // Add current values if we have a new date
-            if (allDates.length > exactDates.length) {
-                Object.keys(positionHistory).forEach(symbol => {
-                    if (symbol === 'CASH') {
-                        positionHistory[symbol].push(parseFloat(data.cash || 99.04));
-                    } else if (data.values && data.values[symbol]) {
-                        positionHistory[symbol].push(parseFloat(data.values[symbol]));
-                    } else {
-                        // For positions no longer held (GEVO, FEIM) or missing data
-                        positionHistory[symbol].push(0);
-                    }
-                });
-            }
-            
-            console.log('Position history:', positionHistory);
-            
-            const datasets = [];
-            
-            // Create datasets only for positions with data
-            Object.keys(positionHistory).forEach((symbol, index) => {
-                const values = positionHistory[symbol];
-                const hasData = values.some(v => v > 0);
+            // We'll build this dynamically from available data
+            fetchHistoricalData().then(historicalData => {
+                console.log('Historical data fetched:', historicalData);
                 
-                if (hasData) {
-                    datasets.push({
-                        label: symbol,
-                        data: values,
-                        borderColor: colors[index % colors.length],
-                        backgroundColor: colors[index % colors.length] + '20',
-                        borderWidth: symbol === 'CASH' ? 1 : 2,
-                        borderDash: symbol === 'CASH' ? [3, 3] : [],
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        fill: false,
-                        tension: 0.1
+                let timelineData = [];
+                
+                // If we have historical data, use it
+                if (historicalData && historicalData.length > 0) {
+                    timelineData = historicalData;
+                } else {
+                    // Fallback: use key milestone dates if no historical data available
+                    console.log('No historical data found, using milestone approach');
+                    timelineData = [
+                        { date: '2025-08-08', note: 'Initial Investment' },
+                        { date: '2025-08-13', note: 'Peak Performance' },
+                        { date: '2025-08-15', note: 'Defensive Trim' },
+                        { date: '2025-08-19', note: 'Tactical Rotation' }
+                    ];
+                }
+                
+                // Add current data point
+                const currentPoint = {
+                    date: data.date,
+                    total_value: parseFloat(data.total_value),
+                    cash: parseFloat(data.cash || 0)
+                };
+                
+                // Add current position values
+                if (data.quantities && data.values) {
+                    Object.keys(data.quantities).forEach(symbol => {
+                        const qty = parseInt(data.quantities[symbol] || 0);
+                        const value = parseFloat(data.values[symbol] || 0);
+                        currentPoint[symbol] = qty > 0 ? value : 0;
                     });
                 }
-            });
-
-            if (positionsChart) {
-                positionsChart.destroy();
-            }
-
-            positionsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dateLabels,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 15
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    if (value === 0) return context.dataset.label + ': Not held';
-                                    return context.dataset.label + ': ' + formatCurrency(value);
-                                },
-                                title: function(context) {
-                                    const dateIndex = context[0].dataIndex;
-                                    return `Date: ${allDates[dateIndex]}`;
-                                }
-                            }
+                
+                timelineData.push(currentPoint);
+                
+                console.log('Final timeline data:', timelineData);
+                
+                // Extract unique dates and sort them
+                const dates = [...new Set(timelineData.map(d => d.date))].sort();
+                console.log('Chart dates:', dates);
+                
+                const dateLabels = dates.map(date => {
+                    const d = new Date(date + 'T12:00:00');
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                
+                // Get all symbols that appear in the data
+                const allSymbols = new Set(['CASH']);
+                timelineData.forEach(point => {
+                    Object.keys(point).forEach(key => {
+                        if (!['date', 'total_value', 'note'].includes(key)) {
+                            allSymbols.add(key.replace('_value', '').toUpperCase());
                         }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Trading Timeline'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Position Value ($)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
-                            }
-                        }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
-                    }
+                    });
+                });
+                
+                if (data.quantities) {
+                    Object.keys(data.quantities).forEach(symbol => allSymbols.add(symbol));
                 }
+                
+                console.log('All symbols found:', Array.from(allSymbols));
+                
+                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+                const datasets = [];
+                
+                // Create dataset for each symbol
+                Array.from(allSymbols).forEach((symbol, index) => {
+                    if (symbol === 'CASH') {
+                        // Special handling for cash
+                        const cashData = dates.map(date => {
+                            const point = timelineData.find(p => p.date === date);
+                            return point ? (point.cash || point.CASH || 0) : 0;
+                        });
+                        
+                        if (cashData.some(v => v > 0)) {
+                            datasets.push({
+                                label: 'CASH',
+                                data: cashData,
+                                borderColor: '#95a5a6',
+                                backgroundColor: '#95a5a620',
+                                borderWidth: 1,
+                                borderDash: [3, 3],
+                                pointRadius: 4,
+                                fill: false
+                            });
+                        }
+                    } else {
+                        // Handle stock positions
+                        const symbolData = dates.map(date => {
+                            const point = timelineData.find(p => p.date === date);
+                            if (point) {
+                                return point[symbol] || point[symbol + '_value'] || point[symbol.toLowerCase()] || 0;
+                            }
+                            return 0;
+                        });
+                        
+                        if (symbolData.some(v => v > 0)) {
+                            datasets.push({
+                                label: symbol,
+                                data: symbolData,
+                                borderColor: colors[index % colors.length],
+                                backgroundColor: colors[index % colors.length] + '20',
+                                borderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                fill: false,
+                                tension: 0.1
+                            });
+                        }
+                    }
+                });
+                
+                console.log('Created datasets:', datasets.length);
+                
+                // Destroy existing chart
+                if (positionsChart) {
+                    positionsChart.destroy();
+                }
+                
+                // Create new chart
+                positionsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dateLabels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        if (value === 0) return context.dataset.label + ': Not held';
+                                        return context.dataset.label + ': ' + formatCurrency(value);
+                                    },
+                                    title: function(context) {
+                                        const dateIndex = context[0].dataIndex;
+                                        return `Date: ${dates[dateIndex]}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Trading Timeline'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Position Value ($)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+                
+                console.log('Position chart created successfully from real data');
+                
+            }).catch(error => {
+                console.error('Error creating positions chart:', error);
+                // Show error message in chart area
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading historical data', ctx.canvas.width / 2, ctx.canvas.height / 2);
             });
-            
-            console.log('Position chart created successfully');
         }
 
         function generateTradeLog(data) {

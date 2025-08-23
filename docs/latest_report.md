@@ -9,5 +9,3 @@
 
 Cash: $4.03
 **Total value**: $1187.80
-
-**Executed trades**: ✅ TRIM UPXI: 17 → 8 shares, +$71.37 cash; ✅ ADD MYOMO: +141 shares @ $1.1800 = $166.38

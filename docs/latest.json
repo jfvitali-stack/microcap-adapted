@@ -25,7 +25,7 @@
     "MYOMO": "413.00",
     "CABA": "181.44"
   },
-  "actions": "\u2705 TRIM UPXI: 17 \u2192 8 shares, +$71.37 cash; \u2705 ADD MYOMO: +141 shares @ $1.1800 = $166.38",
+  "actions": "No trades executed",
   "daily_changes": {
     "individual": {
       "ARQ": {
@@ -59,5 +59,5 @@
       "total_change_pct": 0.0
     }
   },
-  "claude_decisions_executed": true
+  "claude_decisions_executed": false
 }

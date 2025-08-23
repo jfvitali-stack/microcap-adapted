@@ -1,8 +1,10 @@
 {
   "date": "2025-08-23",
-  "cash": "99.04",
+  "cash": "4.03",
   "total_value": "1187.80",
   "prices": {
+    "GEVO": 1.73,
+    "FEIM": 29.01,
     "ARQ": 7.39,
     "UPXI": 7.93,
     "SERV": 9.71,
@@ -11,19 +13,51 @@
   },
   "quantities": {
     "ARQ": 37,
-    "UPXI": 17,
+    "UPXI": 8,
     "SERV": 26,
-    "MYOMO": 209,
+    "MYOMO": 350,
     "CABA": 112
   },
   "values": {
     "ARQ": "273.43",
-    "UPXI": "134.81",
+    "UPXI": "63.44",
     "SERV": "252.46",
-    "MYOMO": "246.62",
+    "MYOMO": "413.00",
     "CABA": "181.44"
   },
-  "actions": null,
-  "daily_changes": null,
-  "claude_decisions_executed": false
+  "actions": "\u2705 TRIM UPXI: 17 \u2192 8 shares, +$71.37 cash; \u2705 ADD MYOMO: +141 shares @ $1.1800 = $166.38",
+  "daily_changes": {
+    "individual": {
+      "ARQ": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "UPXI": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "SERV": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "MYOMO": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      },
+      "CABA": {
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
+      }
+    },
+    "portfolio": {
+      "total_change": 0.0,
+      "total_change_pct": 0.0
+    }
+  },
+  "claude_decisions_executed": true
 }

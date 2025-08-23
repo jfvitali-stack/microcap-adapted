@@ -1,51 +1,51 @@
 {
-“last_updated”: “2025-08-22T16:00:00Z”,
-“decision_date”: “2025-08-22”,
-“decision_type”: “PROFIT_TAKING_REDEPLOYMENT”,
-“analyst”: “Claude Sonnet 4 - Professional Mode”,
-“rationale”: “UPXI momentum exhaustion after +25.9% surge in 2 days without clear catalyst. Professional risk management requires profit-taking on speculation and redeployment into fundamental catalyst opportunity (MYOMO Medicare reimbursement). Eliminates cash drag in 30-day challenge.”,
-“technical_analysis”: {
-“UPXI”: {
-“recent_performance”: “+25.9% in 2 days”,
-“assessment”: “Overextended - profit taking zone”,
-“action”: “TRIM 50% position”
-},
-“MYOMO”: {
-“recent_performance”: “Steady +5.81% yesterday”,
-“catalyst”: “Medicare reimbursement expansion”,
-“assessment”: “Fundamental strength - accumulation opportunity”
-}
-},
-“execution_queue”: [
-{
-“symbol”: “UPXI”,
-“action”: “TRIM”,
-“current_quantity”: 17,
-“target_quantity”: 8,
-“shares_to_sell”: 9,
-“trigger_price”: null,
-“order_type”: “MARKET”,
-“rationale”: “Lock in profits on parabolic move - professional risk management”,
-“status”: “PENDING”
-},
-{
-“symbol”: “MYOMO”,
-“action”: “ADD”,
-“current_quantity”: 209,
-“target_purchase_value”: 167,
-“expected_shares”: 140,
-“target_quantity”: 349,
-“trigger_price”: null,
-“order_type”: “MARKET”,
-“rationale”: “Deploy UPXI proceeds + cash into Medicare catalyst opportunity”,
-“status”: “PENDING”
-}
-],
-“expected_outcome”: {
-“cash_after_trades”: 0.00,
-“upxi_position”: “8 shares (~$63 value)”,
-“myomo_position”: “349 shares (~$414 value)”,
-“portfolio_allocation”: “Fully deployed - 0% cash drag”
-},
-“professional_commitment”: “All future daily assessments will include: 1) Technical analysis with volume/resistance levels, 2) Fundamental catalyst verification, 3) Risk management rationale, 4) Professional trade execution vs momentum chasing.”
+  "last_updated": "2025-08-22T16:00:00Z",
+  "decision_date": "2025-08-22",
+  "decision_type": "PROFIT_TAKING_REDEPLOYMENT",
+  "analyst": "Claude Sonnet 4 - Professional Mode",
+  "rationale": "UPXI momentum exhaustion after +25.9% surge in 2 days without clear catalyst. Professional risk management requires profit-taking on speculation and redeployment into fundamental catalyst opportunity (MYOMO Medicare reimbursement). Eliminates cash drag in 30-day challenge.",
+  "technical_analysis": {
+    "UPXI": {
+      "recent_performance": "+25.9% in 2 days",
+      "assessment": "Overextended - profit taking zone",
+      "action": "TRIM 50% position"
+    },
+    "MYOMO": {
+      "recent_performance": "Steady +5.81% yesterday",
+      "catalyst": "Medicare reimbursement expansion",
+      "assessment": "Fundamental strength - accumulation opportunity"
+    }
+  },
+  "execution_queue": [
+    {
+      "symbol": "UPXI",
+      "action": "TRIM",
+      "current_quantity": 17,
+      "target_quantity": 8,
+      "shares_to_sell": 9,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "rationale": "Lock in profits on parabolic move - professional risk management",
+      "status": "PENDING"
+    },
+    {
+      "symbol": "MYOMO",
+      "action": "ADD",
+      "current_quantity": 209,
+      "target_purchase_value": 167,
+      "expected_shares": 140,
+      "target_quantity": 349,
+      "trigger_price": null,
+      "order_type": "MARKET",
+      "rationale": "Deploy UPXI proceeds + cash into Medicare catalyst opportunity",
+      "status": "PENDING"
+    }
+  ],
+  "expected_outcome": {
+    "cash_after_trades": 0.00,
+    "upxi_position": "8 shares (~$63 value)",
+    "myomo_position": "349 shares (~$414 value)", 
+    "portfolio_allocation": "Fully deployed - 0% cash drag"
+  },
+  "professional_commitment": "All future daily assessments will include: 1) Technical analysis with volume/resistance levels, 2) Fundamental catalyst verification, 3) Risk management rationale, 4) Professional trade execution vs momentum chasing."
 }

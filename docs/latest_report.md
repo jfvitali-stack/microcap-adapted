@@ -1,11 +1,11 @@
 # Portfolio Report
-**As of (latest close)**: 2025-08-25
+**As of (latest close)**: 2025-08-26
 
-- ARQ: close 7.3600, qty 37, value $272.32
-- UPXI: close 7.6000, qty 8, value $60.80
-- SERV: close 9.8400, qty 26, value $255.84
-- MYOMO: close 1.1800, qty 350, value $413.00
-- CABA: close 1.5900, qty 112, value $178.08
+- ARQ: close 7.3500, qty 37, value $271.95
+- UPXI: close 8.5550, qty 8, value $68.44
+- SERV: close 10.2700, qty 26, value $267.02
+- MYOMO: close 1.1150, qty 350, value $390.25
+- CABA: close 1.5300, qty 112, value $171.36
 
 Cash: $4.03
-**Total value**: $1184.07
+**Total value**: $1173.05

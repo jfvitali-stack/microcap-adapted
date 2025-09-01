@@ -1,4 +1,36 @@
-<!DOCTYPE html>
+async function fetchCurrentData() {
+            const sources = [
+                'latest.json',
+                './latest.json', 
+                '/latest.json',
+                'https://deuxfoistrois.github.io/microcap-adapted/latest.json',
+                'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
+            ];
+            
+            let lastError = null;
+            
+            for (const source of sources) {
+                try {
+                    console.log(`Trying to fetch from: ${source}`);
+                    const response = await fetch(source + '?t=' + Date.now());
+                    console.log(`Response status for ${source}:`, response.status);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Successfully loaded data from:', source);
+                        console.log('Data preview:', data);
+                        document.getElementById('data-source-info').textContent = source;
+                        return data;
+                    } else {
+                        console.log(`HTTP ${response.status} for ${source}`);
+                    }
+                } catch (error) {
+                    console.log(`Error fetching from ${source}:`, error.message);
+                    lastError = error;
+                }
+            }
+            
+            console.log('All sources failed, using<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -328,27 +360,82 @@
         function createPortfolioChart(data) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
-            // Combine historical data with current data point
-            const timelineData = [...historicalData];
-            const currentValue = parseFloat(data.total_value);
-            const currentDate = data.date;
+            // Complete daily timeline from start to current date
+            const startDate = new Date('2025-08-08');
+            const currentDate = new Date(data.date);
+            const allDates = [];
             
-            // Add current data point if it's newer than last historical point
-            if (currentDate && currentDate > timelineData[timelineData.length - 1].date) {
-                timelineData.push({
-                    date: currentDate,
-                    total_value: currentValue,
-                    label: 'Current'
-                });
-            } else {
-                // Update the last point if it's the same date
-                timelineData[timelineData.length - 1] = {
-                    date: currentDate,
-                    total_value: currentValue,
-                    label: 'Current'
-                };
+            // Generate every trading day (Mon-Fri) from start to current
+            let date = new Date(startDate);
+            while (date <= currentDate) {
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Skip weekends
+                    allDates.push(date.toISOString().split('T')[0]);
+                }
+                date.setDate(date.getDate() + 1);
             }
-
+            
+            // Known data points with portfolio values
+            const knownData = {
+                '2025-08-08': 995.74,
+                '2025-08-09': 1050.25,
+                '2025-08-12': 1287.53,
+                '2025-08-13': 1326.74,
+                '2025-08-14': 1274.87,
+                '2025-08-15': 1254.76,
+                '2025-08-18': 1181.79,
+                '2025-08-19': 1139.64,
+                '2025-08-21': 1134.92,
+                '2025-08-22': 1178.86,
+                '2025-08-23': 1187.80,
+                '2025-08-25': 1184.07,
+                '2025-08-26': 1173.05,
+                '2025-08-27': parseFloat(data.total_value)
+            };
+            
+            // Interpolate missing values
+            const portfolioValues = [];
+            let lastKnownValue = 995.74;
+            let lastKnownDate = '2025-08-08';
+            
+            for (const dateStr of allDates) {
+                if (knownData[dateStr]) {
+                    portfolioValues.push(knownData[dateStr]);
+                    lastKnownValue = knownData[dateStr];
+                    lastKnownDate = dateStr;
+                } else {
+                    // Find next known value for interpolation
+                    let nextKnownValue = lastKnownValue;
+                    let nextKnownDate = null;
+                    
+                    for (const futureDate of Object.keys(knownData)) {
+                        if (futureDate > dateStr) {
+                            nextKnownValue = knownData[futureDate];
+                            nextKnownDate = futureDate;
+                            break;
+                        }
+                    }
+                    
+                    // Linear interpolation if we have both points
+                    if (nextKnownDate) {
+                        const daysDiff = (new Date(dateStr) - new Date(lastKnownDate)) / (1000 * 60 * 60 * 24);
+                        const totalDays = (new Date(nextKnownDate) - new Date(lastKnownDate)) / (1000 * 60 * 60 * 24);
+                        const progress = daysDiff / totalDays;
+                        const interpolatedValue = lastKnownValue + (nextKnownValue - lastKnownValue) * progress;
+                        portfolioValues.push(interpolatedValue);
+                    } else {
+                        // Use last known value
+                        portfolioValues.push(lastKnownValue);
+                    }
+                }
+            }
+            
+            // Create date labels
+            const dateLabels = allDates.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
             if (portfolioChart) {
                 portfolioChart.destroy();
             }
@@ -356,19 +443,20 @@
             portfolioChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: timelineData.map(d => d.date),
+                    labels: dateLabels,
                     datasets: [{
                         label: 'Portfolio Value',
-                        data: timelineData.map(d => d.total_value),
+                        data: portfolioValues,
                         borderColor: '#2E86C1',
                         backgroundColor: 'rgba(46, 134, 193, 0.1)',
                         borderWidth: 3,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        fill: true
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.1
                     }, {
                         label: 'Starting Value',
-                        data: timelineData.map(() => INITIAL_INVESTMENT),
+                        data: allDates.map(() => 995.74),
                         borderColor: '#95a5a6',
                         borderDash: [5, 5],
                         borderWidth: 2,
@@ -388,22 +476,44 @@
                             intersect: false,
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                    const value = context.parsed.y;
+                                    const returnPct = ((value - 995.74) / 995.74 * 100).toFixed(1);
+                                    return context.dataset.label + ': ' + formatCurrency(value) + ` (${returnPct}%)`;
                                 }
                             }
                         }
                     },
                     scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Trading Days'
+                            },
+                            ticks: {
+                                maxTicksLimit: 10
+                            }
+                        },
                         y: {
+                            title: {
+                                display: true,
+                                text: 'Portfolio Value ($)'
+                            },
                             ticks: {
                                 callback: function(value) {
                                     return formatCurrency(value);
                                 }
                             }
                         }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
                     }
                 }
             });
+            
+            console.log('Portfolio chart updated with complete timeline');
         }
 
         function createAllocationChart(data) {

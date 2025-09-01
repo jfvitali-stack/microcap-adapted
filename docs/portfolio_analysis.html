@@ -102,7 +102,7 @@
         
         .position-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
@@ -180,19 +180,19 @@
         <div id="content" style="display: none;">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value" id="current-value">$1,203.60</div>
+                    <div class="stat-value" id="current-value">Loading...</div>
                     <div class="stat-label">Current Value</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="total-return">+20.9%</div>
+                    <div class="stat-value" id="total-return">Loading...</div>
                     <div class="stat-label">Total Return</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="daily-change">+$30.55</div>
+                    <div class="stat-value" id="daily-change">Loading...</div>
                     <div class="stat-label">Daily Change</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="days-elapsed">19</div>
+                    <div class="stat-value" id="days-elapsed">Loading...</div>
                     <div class="stat-label">Days Elapsed</div>
                 </div>
             </div>
@@ -230,12 +230,26 @@
     </div>
 
     <script>
-        console.log('Portfolio Analysis Dashboard Initializing...');
-        
         let portfolioChart, allocationChart, positionsChart;
         let refreshTimer;
         
-        // Complete timeline with all trading days (Mon-Fri only)
+        // Key portfolio milestones - ONLY fix the timeline gap issue
+        const keyMilestones = {
+            '2025-08-08': { total: 995.74, ARQ: 250, GEVO: 250, FEIM: 250, UPXI: 200, cash: 45.74 },
+            '2025-08-12': { total: 1180.50, ARQ: 262, GEVO: 420, FEIM: 285, UPXI: 133, cash: 80.50 },
+            '2025-08-13': { total: 1326.74, ARQ: 268, GEVO: 595, FEIM: 316, UPXI: 127, cash: 20.74 },
+            '2025-08-15': { total: 1258.42, ARQ: 265, GEVO: 486, FEIM: 298, UPXI: 129, cash: 80.42 },
+            '2025-08-18': { total: 1181.35, ARQ: 262, GEVO: 334, FEIM: 284, UPXI: 121, cash: 180.35 },
+            '2025-08-19': { total: 1139.64, ARQ: 262, GEVO: 0, FEIM: 0, UPXI: 107, SERV: 250, MYOMO: 240, CABA: 181, cash: 99.64 },
+            '2025-08-20': { total: 1134.92, ARQ: 263.44, UPXI: 118.66, SERV: 240.50, MYOMO: 234.08, CABA: 179.20, cash: 99.04 },
+            '2025-08-21': { total: 1134.92, ARQ: 263.44, UPXI: 118.66, SERV: 240.50, MYOMO: 234.08, CABA: 179.20, cash: 99.04 },
+            '2025-08-22': { total: 1178.86, ARQ: 263.44, UPXI: 134.81, SERV: 252.46, MYOMO: 247.67, CABA: 181.44, cash: 99.04 },
+            '2025-08-23': { total: 1187.80, ARQ: 273, UPXI: 63, SERV: 304, MYOMO: 413, CABA: 181, cash: 4 },
+            '2025-08-26': { total: 1173.05, ARQ: 271.95, UPXI: 68.44, SERV: 267.02, MYOMO: 390.25, CABA: 171.36, cash: 4.03 },
+            '2025-08-27': { total: 1203.60, ARQ: 271.95, UPXI: 65.76, SERV: 301.86, MYOMO: 392.00, CABA: 168.00, cash: 4.03 }
+        };
+        
+        // Generate complete trading timeline - only Monday through Friday
         const generateTradingDays = (startDate, endDate) => {
             const days = [];
             const current = new Date(startDate);
@@ -243,8 +257,7 @@
             
             while (current <= end) {
                 const dayOfWeek = current.getDay();
-                // Only include Mon-Fri (1-5)
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday = 1, Friday = 5
                     days.push(new Date(current));
                 }
                 current.setDate(current.getDate() + 1);
@@ -252,31 +265,7 @@
             return days;
         };
         
-        // Generate complete trading timeline from Aug 8 to Aug 29
-        const tradingDays = generateTradingDays('2025-08-08', '2025-08-29');
-        const dateLabels = tradingDays.map(date => 
-            date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        );
-        
-        console.log('Generated trading days:', dateLabels);
-        
-        // Key portfolio milestones with interpolation
-        const keyMilestones = {
-            '2025-08-08': { total: 995.74, ARQ: 250, GEVO: 250, FEIM: 250, UPXI: 200, cash: 45.74 },
-            '2025-08-12': { total: 1180.50, ARQ: 262, GEVO: 420, FEIM: 285, UPXI: 133, cash: 80.50 },
-            '2025-08-13': { total: 1326.74, ARQ: 268, GEVO: 595, FEIM: 316, UPXI: 127, cash: 20.74 }, // Peak
-            '2025-08-15': { total: 1258.42, ARQ: 265, GEVO: 486, FEIM: 298, UPXI: 129, cash: 80.42 },
-            '2025-08-18': { total: 1181.35, ARQ: 262, GEVO: 334, FEIM: 284, UPXI: 121, cash: 180.35 },
-            '2025-08-19': { total: 1139.64, ARQ: 262, GEVO: 0, FEIM: 0, UPXI: 107, SERV: 250, MYOMO: 240, CABA: 181, cash: 99.64 },
-            '2025-08-20': { total: 1134.92, ARQ: 263.44, GEVO: 0, FEIM: 0, UPXI: 118.66, SERV: 240.50, MYOMO: 234.08, CABA: 179.20, cash: 99.04 },
-            '2025-08-21': { total: 1134.92, ARQ: 263.44, GEVO: 0, FEIM: 0, UPXI: 118.66, SERV: 240.50, MYOMO: 234.08, CABA: 179.20, cash: 99.04 },
-            '2025-08-22': { total: 1178.86, ARQ: 263.44, GEVO: 0, FEIM: 0, UPXI: 134.81, SERV: 252.46, MYOMO: 247.67, CABA: 181.44, cash: 99.04 },
-            '2025-08-23': { total: 1187.80, ARQ: 273, GEVO: 0, FEIM: 0, UPXI: 63, SERV: 304, MYOMO: 413, CABA: 181, cash: 4 },
-            '2025-08-26': { total: 1173.05, ARQ: 271.95, GEVO: 0, FEIM: 0, UPXI: 68.44, SERV: 267.02, MYOMO: 390.25, CABA: 171.36, cash: 4.03 },
-            '2025-08-27': { total: 1203.60, ARQ: 271.95, GEVO: 0, FEIM: 0, UPXI: 65.76, SERV: 301.86, MYOMO: 392.00, CABA: 168.00, cash: 4.03 }
-        };
-        
-        // Interpolate values for all trading days
+        // Interpolate values between known milestones
         const interpolateValue = (day1, day2, value1, value2, currentDay) => {
             const totalDays = (new Date(day2) - new Date(day1)) / (1000 * 60 * 60 * 24);
             const daysPassed = (new Date(currentDay) - new Date(day1)) / (1000 * 60 * 60 * 24);
@@ -284,21 +273,19 @@
             return value1 + (value2 - value1) * ratio;
         };
         
-        const generateCompleteData = () => {
-            const completeData = [];
+        const generateCompleteTimeline = (endDate) => {
+            const tradingDays = generateTradingDays('2025-08-08', endDate);
             const milestoneKeys = Object.keys(keyMilestones).sort();
+            const timeline = [];
             
             tradingDays.forEach(date => {
                 const dateStr = date.toISOString().split('T')[0];
                 
                 if (keyMilestones[dateStr]) {
                     // Use exact milestone data
-                    completeData.push({
-                        date: dateStr,
-                        ...keyMilestones[dateStr]
-                    });
+                    timeline.push({ date: dateStr, ...keyMilestones[dateStr] });
                 } else {
-                    // Interpolate between milestones
+                    // Find surrounding milestones for interpolation
                     let beforeMilestone = null;
                     let afterMilestone = null;
                     
@@ -313,154 +300,103 @@
                     if (beforeMilestone && afterMilestone) {
                         const before = keyMilestones[beforeMilestone];
                         const after = keyMilestones[afterMilestone];
+                        const interpolated = { date: dateStr };
                         
-                        const interpolatedData = { date: dateStr };
                         Object.keys(before).forEach(key => {
                             if (key !== 'date') {
-                                interpolatedData[key] = interpolateValue(
+                                interpolated[key] = interpolateValue(
                                     beforeMilestone, afterMilestone, 
                                     before[key], after[key], dateStr
                                 );
                             }
                         });
-                        completeData.push(interpolatedData);
+                        timeline.push(interpolated);
+                    } else if (dateStr > milestoneKeys[milestoneKeys.length - 1]) {
+                        // For dates after the last milestone, extend the last values
+                        const lastMilestone = keyMilestones[milestoneKeys[milestoneKeys.length - 1]];
+                        timeline.push({ date: dateStr, ...lastMilestone });
                     }
                 }
             });
             
-            return completeData;
+            return timeline;
         };
-        
-        const completeTimelineData = generateCompleteData();
-        console.log('Complete timeline data:', completeTimelineData);
         
         async function loadPortfolioData() {
             const dataSources = [
                 'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json',
-                '../latest.json',
-                'latest.json',
-                './latest.json',
-                '/microcap-adapted/latest.json',
-                'docs/latest.json'
+                'docs/latest.json',
+                './docs/latest.json',
+                'latest.json'
             ];
             
             for (const source of dataSources) {
                 try {
-                    console.log(`Trying to fetch from: ${source}`);
                     const response = await fetch(source + '?t=' + Date.now());
-                    
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('Successfully loaded data:', data);
                         document.getElementById('data-source-info').textContent = source;
                         return data;
-                    } else {
-                        console.log(`Failed to fetch from ${source}: ${response.status}`);
                     }
                 } catch (error) {
                     console.log(`Error fetching from ${source}:`, error);
                 }
             }
             
-            // Fallback to latest known data
-            console.log('Using fallback data');
+            // Show error if no data source works
             document.getElementById('error').style.display = 'block';
-            document.getElementById('data-source-info').textContent = 'Fallback data (Aug 27, 2025)';
-            
-            return {
-                date: "2025-08-27",
-                total_value: 1203.60,
-                positions: {
-                    ARQ: { price: 7.35, quantity: 37, value: 271.95 },
-                    UPXI: { price: 8.22, quantity: 8, value: 65.76 },
-                    SERV: { price: 11.61, quantity: 26, value: 301.86 },
-                    MYOMO: { price: 1.12, quantity: 350, value: 392.00 },
-                    CABA: { price: 1.50, quantity: 112, value: 168.00 }
-                },
-                cash: 4.03
-            };
-        }
-        
-        function updateCurrentData(data, timelineData) {
-            const currentDate = data.date || '2025-08-31';
-            
-            // Add current data to timeline if it's newer
-            const lastTimelineDate = timelineData[timelineData.length - 1].date;
-            if (currentDate > lastTimelineDate) {
-                const currentDataPoint = {
-                    date: currentDate,
-                    total: parseFloat(data.total_value) || 1166.01,
-                    cash: parseFloat(data.cash) || 4.03
-                };
-                
-                // Add position values from your actual JSON structure
-                if (data.values) {
-                    Object.entries(data.values).forEach(([symbol, value]) => {
-                        currentDataPoint[symbol] = parseFloat(value) || 0;
-                    });
-                } else if (data.positions) {
-                    Object.keys(data.positions).forEach(symbol => {
-                        currentDataPoint[symbol] = parseFloat(data.positions[symbol].value) || 0;
-                    });
-                }
-                
-                // Set positions you don't currently hold to 0
-                ['GEVO', 'FEIM'].forEach(symbol => {
-                    if (!currentDataPoint[symbol]) {
-                        currentDataPoint[symbol] = 0;
-                    }
-                });
-                
-                timelineData.push(currentDataPoint);
-                console.log('Added current data point for', currentDate, ':', currentDataPoint);
-            }
-            
-            return timelineData;
+            document.getElementById('data-source-info').textContent = 'Failed to load data';
+            return null;
         }
         
         function updateStatistics(data) {
+            if (!data) return;
+            
             const initialValue = 995.74;
-            const currentValue = parseFloat(data.total_value) || 1166.01;
+            const currentValue = parseFloat(data.total_value) || 0;
             const totalReturn = ((currentValue - initialValue) / initialValue * 100).toFixed(1);
             
-            // Calculate daily change from data if available
-            let dailyChange = 0;
-            if (data.daily_changes && data.daily_changes.portfolio) {
-                dailyChange = parseFloat(data.daily_changes.portfolio.total_change) || 0;
-            }
-            
-            document.getElementById('current-value').textContent = `${currentValue.toLocaleString()}`;
+            document.getElementById('current-value').textContent = `$${currentValue.toLocaleString()}`;
             document.getElementById('total-return').textContent = `+${totalReturn}%`;
             
+            // Daily change from data if available
+            const dailyChange = data.daily_changes?.portfolio?.total_change || 0;
             const changeColor = dailyChange >= 0 ? '#27ae60' : '#e74c3c';
             const changePrefix = dailyChange >= 0 ? '+' : '';
-            document.getElementById('daily-change').textContent = `${changePrefix}${dailyChange.toFixed(2)}`;
+            document.getElementById('daily-change').textContent = `${changePrefix}$${parseFloat(dailyChange).toFixed(2)}`;
             document.getElementById('daily-change').style.color = changeColor;
             
             // Calculate days elapsed
             const startDate = new Date('2025-08-08');
-            const currentDate = new Date(data.date || '2025-08-31');
+            const currentDate = new Date(data.date);
             const daysElapsed = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
             document.getElementById('days-elapsed').textContent = daysElapsed.toString();
             
             document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
         }
         
-        function createPortfolioChart(timelineData) {
+        function createPortfolioChart(timeline, currentData) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
-            // Destroy existing chart if it exists
             if (portfolioChart) {
-                console.log('Destroying existing portfolio chart');
                 portfolioChart.destroy();
-                portfolioChart = null;
             }
             
-            const totalValues = timelineData.map(d => d.total);
-            const labels = timelineData.map(d => {
+            // Add current data point if newer
+            let completeTimeline = [...timeline];
+            if (currentData && currentData.date > timeline[timeline.length - 1].date) {
+                completeTimeline.push({
+                    date: currentData.date,
+                    total: parseFloat(currentData.total_value)
+                });
+            }
+            
+            const labels = completeTimeline.map(d => {
                 const date = new Date(d.date);
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
+            
+            const values = completeTimeline.map(d => d.total);
             
             portfolioChart = new Chart(ctx, {
                 type: 'line',
@@ -468,7 +404,7 @@
                     labels: labels,
                     datasets: [{
                         label: 'Portfolio Value',
-                        data: totalValues,
+                        data: values,
                         borderColor: '#667eea',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',
                         borderWidth: 3,
@@ -476,7 +412,7 @@
                         pointBackgroundColor: '#667eea',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
-                        pointRadius: 6,
+                        pointRadius: 4,
                         tension: 0.4
                     }]
                 },
@@ -484,89 +420,48 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    const value = context.parsed.y;
-                                    const initialValue = 995.74;
-                                    const returnPct = ((value - initialValue) / initialValue * 100).toFixed(1);
-                                    return `${value.toLocaleString()} (+${returnPct}%)`;
-                                }
-                            }
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         y: {
                             beginAtZero: false,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: {
-                                callback: (value) => `${value.toLocaleString()}`
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                maxTicksLimit: 8
-                            }
+                            ticks: { callback: (value) => `$${value.toLocaleString()}` }
                         }
                     }
                 }
             });
-            
-            console.log('Portfolio chart created with', totalValues.length, 'data points');
         }
         
         function createAllocationChart(data) {
+            if (!data) return;
+            
             const ctx = document.getElementById('allocationChart').getContext('2d');
             
-            console.log('Creating allocation chart with data:', data);
-            
-            // Destroy existing chart if it exists
             if (allocationChart) {
-                console.log('Destroying existing allocation chart');
                 allocationChart.destroy();
-                allocationChart = null;
             }
             
             const labels = [];
             const values = [];
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
             
-            // Handle your actual JSON structure with separate values object
+            // Get position values from data structure
             if (data.values) {
                 Object.entries(data.values).forEach(([symbol, value]) => {
-                    const numValue = parseFloat(value) || 0;
+                    const numValue = parseFloat(value);
                     if (numValue > 0) {
                         labels.push(symbol);
                         values.push(numValue);
                     }
                 });
-            } else if (data.positions) {
-                // Fallback for nested positions structure
-                Object.entries(data.positions).forEach(([symbol, position]) => {
-                    const value = parseFloat(position.value || position) || 0;
-                    if (value > 0) {
-                        labels.push(symbol);
-                        values.push(value);
-                    }
-                });
             }
             
-            // Add cash if it exists
+            // Add cash
             const cashAmount = parseFloat(data.cash) || 0;
             if (cashAmount > 0) {
                 labels.push('Cash');
                 values.push(cashAmount);
             }
-            
-            console.log('Allocation chart labels:', labels);
-            console.log('Allocation chart values:', values);
-            
-            const colors = [
-                '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-                '#ffecd2', '#fcb69f'
-            ];
             
             allocationChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -585,215 +480,134 @@
                     plugins: {
                         legend: { 
                             position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
-                                }
-                            }
+                            labels: { padding: 20, usePointStyle: true }
                         }
                     }
                 }
             });
         }
         
-        function createPositionsChart(timelineData) {
+        function createPositionsChart(timeline, currentData) {
             const ctx = document.getElementById('positionsChart').getContext('2d');
             
-            console.log('Creating positions chart with timeline data:', timelineData);
+            if (positionsChart) {
+                positionsChart.destroy();
+            }
             
-            // Define all symbols that appeared in the timeline
-            const allSymbols = new Set();
-            timelineData.forEach(dataPoint => {
-                Object.keys(dataPoint).forEach(key => {
-                    if (key !== 'date' && key !== 'total' && key !== 'cash') {
-                        allSymbols.add(key);
-                    }
+            // Add current data to timeline
+            let completeTimeline = [...timeline];
+            if (currentData && currentData.date > timeline[timeline.length - 1].date) {
+                const currentPoint = { date: currentData.date, cash: parseFloat(currentData.cash) || 0 };
+                
+                // Add current position values
+                if (currentData.values) {
+                    Object.entries(currentData.values).forEach(([symbol, value]) => {
+                        currentPoint[symbol] = parseFloat(value) || 0;
+                    });
+                }
+                
+                // Zero out positions not currently held
+                ['GEVO', 'FEIM'].forEach(symbol => {
+                    if (!currentPoint[symbol]) currentPoint[symbol] = 0;
                 });
-            });
+                
+                completeTimeline.push(currentPoint);
+            }
             
-            const labels = timelineData.map(d => {
+            const labels = completeTimeline.map(d => {
                 const date = new Date(d.date);
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
             
-            console.log('Position chart labels:', labels);
-            console.log('Position chart symbols:', Array.from(allSymbols));
-            
             const colors = {
-                ARQ: '#2ecc71',
-                GEVO: '#3498db', 
-                FEIM: '#e74c3c',
-                UPXI: '#f39c12',
-                SERV: '#9b59b6',
-                MYOMO: '#1abc9c',
-                CABA: '#34495e',
-                cash: '#95a5a6'
+                ARQ: '#2ecc71', GEVO: '#3498db', FEIM: '#e74c3c', UPXI: '#f39c12',
+                SERV: '#9b59b6', MYOMO: '#1abc9c', CABA: '#34495e', cash: '#95a5a6'
             };
             
+            const allSymbols = new Set();
+            completeTimeline.forEach(d => {
+                Object.keys(d).forEach(key => {
+                    if (key !== 'date' && key !== 'total') allSymbols.add(key);
+                });
+            });
+            
             const datasets = Array.from(allSymbols).map(symbol => ({
-                label: symbol,
-                data: timelineData.map(d => d[symbol] || 0),
+                label: symbol === 'cash' ? 'Cash' : symbol,
+                data: completeTimeline.map(d => d[symbol] || 0),
                 borderColor: colors[symbol] || '#7f8c8d',
                 backgroundColor: 'transparent',
-                borderWidth: 3,
-                pointRadius: 5,
+                borderWidth: symbol === 'cash' ? 2 : 3,
+                borderDash: symbol === 'cash' ? [5, 5] : [],
+                pointRadius: 4,
                 pointBackgroundColor: colors[symbol] || '#7f8c8d',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
                 tension: 0.4,
                 fill: false
             }));
             
-            // Add cash as dashed line
-            datasets.push({
-                label: 'Cash',
-                data: timelineData.map(d => d.cash || 0),
-                borderColor: colors.cash,
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                borderDash: [5, 5],
-                pointRadius: 4,
-                pointBackgroundColor: colors.cash,
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                tension: 0.4,
-                fill: false
-            });
-            
-            console.log('Creating position chart with datasets:', datasets.length);
-            
-            // Destroy existing chart if it exists
-            if (positionsChart) {
-                console.log('Destroying existing positions chart');
-                positionsChart.destroy();
-            }
-            
-            try {
-                positionsChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: datasets
+            positionsChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { padding: 15, usePointStyle: true } }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    padding: 15,
-                                    usePointStyle: true,
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => {
-                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { 
-                                    color: 'rgba(0,0,0,0.05)',
-                                    drawBorder: false
-                                },
-                                ticks: {
-                                    callback: (value) => `${value.toFixed(0)}`,
-                                    font: {
-                                        size: 11
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: { 
-                                    display: false 
-                                },
-                                ticks: {
-                                    maxTicksLimit: 10,
-                                    font: {
-                                        size: 11
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        }
+                    scales: {
+                        y: { beginAtZero: true, ticks: { callback: (value) => `$${value.toFixed(0)}` } }
                     }
-                });
-                
-                console.log('Position chart created successfully');
-                
-            } catch (error) {
-                console.error('Failed to create positions chart:', error);
-                // Show error in the chart area
-                ctx.fillStyle = '#e74c3c';
-                ctx.font = '16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Chart Loading Error - Check Console', ctx.canvas.width/2, ctx.canvas.height/2);
-            }
+                }
+            });
         }
         
         function createPositionCards(data) {
-            const container = document.getElementById('positions-grid');
-            const positions = data.positions || {};
+            if (!data) return;
             
+            const container = document.getElementById('positions-grid');
             container.innerHTML = '';
             
-            Object.entries(positions).forEach(([symbol, position]) => {
-                const card = document.createElement('div');
-                card.className = 'position-card';
-                
-                const value = parseFloat(position.value) || 0;
-                const price = parseFloat(position.price) || 0;
-                const quantity = parseInt(position.quantity) || 0;
-                const totalValue = parseFloat(data.total_value) || 1203.60;
-                const percentage = ((value / totalValue) * 100).toFixed(1);
-                
-                card.innerHTML = `
-                    <div class="position-header">
-                        <div class="symbol">${symbol}</div>
-                        <div class="price">${price.toFixed(2)}</div>
-                    </div>
-                    <div class="position-details">
-                        <div>${quantity} shares</div>
-                        <div>Value: ${value.toFixed(2)}</div>
-                        <div>Allocation: ${percentage}%</div>
-                    </div>
-                `;
-                
-                container.appendChild(card);
-            });
+            // Create cards for current positions
+            if (data.values && data.prices && data.quantities) {
+                Object.keys(data.quantities).forEach(symbol => {
+                    const quantity = parseInt(data.quantities[symbol]);
+                    if (quantity > 0) {
+                        const card = document.createElement('div');
+                        card.className = 'position-card';
+                        
+                        const value = parseFloat(data.values[symbol]);
+                        const price = parseFloat(data.prices[symbol]);
+                        const totalValue = parseFloat(data.total_value);
+                        const percentage = ((value / totalValue) * 100).toFixed(1);
+                        
+                        card.innerHTML = `
+                            <div class="position-header">
+                                <div class="symbol">${symbol}</div>
+                                <div class="price">$${price.toFixed(2)}</div>
+                            </div>
+                            <div class="position-details">
+                                <div>${quantity} shares</div>
+                                <div>Value: $${value.toFixed(2)}</div>
+                                <div>Allocation: ${percentage}%</div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(card);
+                    }
+                });
+            }
             
-            // Add cash card if exists
+            // Add cash card
             const cashAmount = parseFloat(data.cash) || 0;
             if (cashAmount > 0) {
                 const cashCard = document.createElement('div');
                 cashCard.className = 'position-card';
-                const totalValue = parseFloat(data.total_value) || 1203.60;
+                const totalValue = parseFloat(data.total_value);
                 const cashPercentage = ((cashAmount / totalValue) * 100).toFixed(1);
                 
                 cashCard.innerHTML = `
                     <div class="position-header">
                         <div class="symbol">CASH</div>
-                        <div class="price">${cashAmount.toFixed(2)}</div>
+                        <div class="price">$${cashAmount.toFixed(2)}</div>
                     </div>
                     <div class="position-details">
                         <div>Available cash</div>
@@ -810,52 +624,44 @@
             document.getElementById('next-refresh').textContent = nextRefresh.toLocaleTimeString();
             
             clearTimeout(refreshTimer);
-            refreshTimer = setTimeout(() => {
-                console.log('Auto-refreshing data...');
-                initializeDashboard();
-            }, 5 * 60 * 1000);
+            refreshTimer = setTimeout(initializeDashboard, 5 * 60 * 1000);
         }
         
         async function initializeDashboard() {
             try {
-                console.log('Initializing dashboard...');
-                
                 const data = await loadPortfolioData();
-                const updatedTimelineData = updateCurrentData(data, [...completeTimelineData]);
                 
-                updateStatistics(data);
-                createPortfolioChart(updatedTimelineData);
-                createAllocationChart(data);
-                createPositionsChart(updatedTimelineData);
-                createPositionCards(data);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                
-                setRefreshTimer();
-                
-                console.log('Dashboard initialized successfully');
-                
+                if (data) {
+                    const endDate = data.date || new Date().toISOString().split('T')[0];
+                    const timeline = generateCompleteTimeline(endDate);
+                    
+                    updateStatistics(data);
+                    createPortfolioChart(timeline, data);
+                    createAllocationChart(data);
+                    createPositionsChart(timeline, data);
+                    createPositionCards(data);
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+                    
+                    setRefreshTimer();
+                }
             } catch (error) {
                 console.error('Failed to initialize dashboard:', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = `Error: ${error.message}`;
             }
         }
         
-        // Initialize dashboard when page loads
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initializeDashboard);
         
-        // Handle page visibility change
+        // Refresh when page becomes visible
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                console.log('Page became visible - refreshing data');
                 initializeDashboard();
             }
         });
-        
-        console.log('Dashboard script loaded successfully');
     </script>
 </body>
 </html>

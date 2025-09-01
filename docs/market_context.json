@@ -1,6 +1,6 @@
 {
   "date": "2025-08-29",
-  "timestamp": "2025-08-31T20:39:14.049039+00:00",
+  "timestamp": "2025-09-01T20:39:10.536337+00:00",
   "megacaps": {
     "AAPL": {
       "price": 232.14,
@@ -18,9 +18,9 @@
       "volume": 39715600
     },
     "AMZN": {
-      "price": 229.0,
-      "daily_change": -1.12,
-      "volume": 26177800
+      "price": NaN,
+      "daily_change": NaN,
+      "volume": 0
     },
     "NVDA": {
       "price": 174.18,
@@ -92,6 +92,6 @@
       "volume": 8806100
     }
   },
-  "market_mood": "BEARISH",
+  "market_mood": "NEUTRAL",
   "small_vs_large_cap": "NEUTRAL"
 }

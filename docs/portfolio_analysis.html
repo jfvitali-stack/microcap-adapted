@@ -336,12 +336,12 @@
         
         async function loadPortfolioData() {
             const dataSources = [
-                'docs/latest.json',
-                './docs/latest.json',
-                '/docs/latest.json',
+                'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json',
+                '../latest.json',
                 'latest.json',
                 './latest.json',
-                'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
+                '/microcap-adapted/latest.json',
+                'docs/latest.json'
             ];
             
             for (const source of dataSources) {

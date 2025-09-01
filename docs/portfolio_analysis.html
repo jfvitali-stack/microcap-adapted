@@ -652,19 +652,20 @@
                 const card = document.createElement('div');
                 card.className = 'position-card';
                 
-                const value = position.value || 0;
-                const price = position.price || 0;
-                const quantity = position.quantity || 0;
-                const percentage = ((value / (data.total_value || 1203.60)) * 100).toFixed(1);
+                const value = parseFloat(position.value) || 0;
+                const price = parseFloat(position.price) || 0;
+                const quantity = parseInt(position.quantity) || 0;
+                const totalValue = parseFloat(data.total_value) || 1203.60;
+                const percentage = ((value / totalValue) * 100).toFixed(1);
                 
                 card.innerHTML = `
                     <div class="position-header">
                         <div class="symbol">${symbol}</div>
-                        <div class="price">$${price.toFixed(2)}</div>
+                        <div class="price">${price.toFixed(2)}</div>
                     </div>
                     <div class="position-details">
                         <div>${quantity} shares</div>
-                        <div>Value: $${value.toFixed(2)}</div>
+                        <div>Value: ${value.toFixed(2)}</div>
                         <div>Allocation: ${percentage}%</div>
                     </div>
                 `;
@@ -673,15 +674,17 @@
             });
             
             // Add cash card if exists
-            if (data.cash && data.cash > 0) {
+            const cashAmount = parseFloat(data.cash) || 0;
+            if (cashAmount > 0) {
                 const cashCard = document.createElement('div');
                 cashCard.className = 'position-card';
-                const cashPercentage = ((data.cash / (data.total_value || 1203.60)) * 100).toFixed(1);
+                const totalValue = parseFloat(data.total_value) || 1203.60;
+                const cashPercentage = ((cashAmount / totalValue) * 100).toFixed(1);
                 
                 cashCard.innerHTML = `
                     <div class="position-header">
                         <div class="symbol">CASH</div>
-                        <div class="price">$${data.cash.toFixed(2)}</div>
+                        <div class="price">${cashAmount.toFixed(2)}</div>
                     </div>
                     <div class="position-details">
                         <div>Available cash</div>

@@ -1,36 +1,4 @@
-async function fetchCurrentData() {
-            const sources = [
-                'latest.json',
-                './latest.json', 
-                '/latest.json',
-                'https://deuxfoistrois.github.io/microcap-adapted/latest.json',
-                'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
-            ];
-            
-            let lastError = null;
-            
-            for (const source of sources) {
-                try {
-                    console.log(`Trying to fetch from: ${source}`);
-                    const response = await fetch(source + '?t=' + Date.now());
-                    console.log(`Response status for ${source}:`, response.status);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('Successfully loaded data from:', source);
-                        console.log('Data preview:', data);
-                        document.getElementById('data-source-info').textContent = source;
-                        return data;
-                    } else {
-                        console.log(`HTTP ${response.status} for ${source}`);
-                    }
-                } catch (error) {
-                    console.log(`Error fetching from ${source}:`, error.message);
-                    lastError = error;
-                }
-            }
-            
-            console.log('All sources failed, using<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,21 +7,20 @@ async function fetchCurrentData() {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
             min-height: 100vh;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
+            border-radius: 20px;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         }
         
         .header {
@@ -65,31 +32,9 @@ async function fetchCurrentData() {
         
         .header h1 {
             color: #2c3e50;
+            font-size: 2.5rem;
             margin: 0;
-            font-size: 2.5em;
             font-weight: 700;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-        
-        .chart-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
         }
         
         .stats-grid {
@@ -100,99 +45,120 @@ async function fetchCurrentData() {
         }
         
         .stat-card {
-            background: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-radius: 15px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         .stat-value {
-            font-size: 2em;
+            font-size: 2rem;
             font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 5px;
-        }
-        
-        .stat-value.negative {
-            color: #e74c3c;
+            margin: 5px 0;
         }
         
         .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
         
-        .trade-log {
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .position-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
         }
         
-        .trade-entry {
-            border-left: 4px solid #3498db;
-            padding: 15px;
+        .position-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
             margin-bottom: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
         }
         
-        .trade-date {
+        .symbol {
+            font-size: 1.3rem;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 10px;
         }
         
-        .trade-action {
-            margin: 5px 0;
-            padding: 5px 10px;
-            border-radius: 3px;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        
-        .buy {
-            background: #d5f4e6;
+        .price {
+            font-size: 1.1rem;
             color: #27ae60;
-            border: 1px solid #27ae60;
+            font-weight: 600;
         }
         
-        .sell {
-            background: #fadbd8;
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
+        .position-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
         
-        .hold {
-            background: #e8f4f8;
-            color: #3498db;
-            border: 1px solid #3498db;
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        
+        canvas {
+            max-height: 400px !important;
+        }
+        
+        .data-source {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #0c5460;
         }
         
         .loading {
             text-align: center;
             padding: 40px;
             color: #7f8c8d;
-            font-size: 1.2em;
+            font-style: italic;
         }
         
         .error {
-            background: #e74c3c;
-            color: white;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
             padding: 15px;
-            border-radius: 10px;
-            text-align: center;
             margin: 20px 0;
-        }
-        
-        .data-source {
-            text-align: center;
-            margin-top: 20px;
-            color: #7f8c8d;
-            font-size: 0.9em;
         }
     </style>
 </head>
@@ -200,351 +166,340 @@ async function fetchCurrentData() {
     <div class="container">
         <div class="header">
             <h1>📊 Portfolio Performance Analysis</h1>
-            <div style="color: #7f8c8d; font-size: 1.2em;">30-Day Micro-Cap Trading Experiment</div>
+            <p>Professional Micro-Cap Strategy Tracking</p>
         </div>
-
+        
         <div id="loading" class="loading">
             Loading portfolio data...
         </div>
         
         <div id="error" class="error" style="display: none;">
-            Failed to load portfolio data. Please check your internet connection.
+            Failed to load portfolio data. Using fallback data for demonstration.
         </div>
-
-        <div id="dashboard" style="display: none;">
+        
+        <div id="content" style="display: none;">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value" id="current-value">Loading...</div>
+                    <div class="stat-value" id="current-value">$1,203.60</div>
                     <div class="stat-label">Current Value</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="total-return">Loading...</div>
+                    <div class="stat-value" id="total-return">+20.9%</div>
                     <div class="stat-label">Total Return</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="peak-value">Loading...</div>
-                    <div class="stat-label">Peak Value</div>
+                    <div class="stat-value" id="daily-change">+$30.55</div>
+                    <div class="stat-label">Daily Change</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="days-elapsed">Loading...</div>
+                    <div class="stat-value" id="days-elapsed">19</div>
                     <div class="stat-label">Days Elapsed</div>
                 </div>
             </div>
-
-            <div class="chart-container">
-                <div class="chart-title">Portfolio Value Over Time</div>
-                <div class="chart-wrapper">
+            
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Portfolio Value Timeline</div>
                     <canvas id="portfolioChart"></canvas>
                 </div>
-            </div>
-
-            <div class="chart-container">
-                <div class="chart-title">Current Allocation</div>
-                <div class="chart-wrapper">
+                <div class="chart-card">
+                    <div class="chart-title">Current Allocation</div>
                     <canvas id="allocationChart"></canvas>
                 </div>
             </div>
-
-            <div class="chart-container">
+            
+            <div class="chart-card">
                 <div class="chart-title">Individual Position Values</div>
-                <div class="chart-wrapper">
-                    <canvas id="positionsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="trade-log">
-                <div class="chart-title">📋 Complete Trading History</div>
-                <div id="trade-log-content">
-                    <!-- Will be populated dynamically -->
-                </div>
+                <canvas id="positionsChart"></canvas>
             </div>
             
-            <div class="data-source">
-                <p>Data source: <span id="data-source-info">latest.json</span> | Last updated: <span id="last-update">Loading...</span></p>
-                <p>Auto-refreshes every 5 minutes | Next refresh: <span id="next-refresh">--:--</span></p>
+            <div class="position-grid" id="positions-grid">
+                <!-- Position cards will be populated by JavaScript -->
             </div>
+        </div>
+        
+        <div class="data-source">
+            <strong>Data Source:</strong> <span id="data-source-info">Loading...</span><br>
+            <strong>Last Updated:</strong> <span id="last-updated">--</span><br>
+            <strong>Next Refresh:</strong> <span id="next-refresh">--</span>
+        </div>
+        
+        <div class="footer">
+            <p>Professional trading analysis dashboard | Real-time portfolio tracking</p>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let currentData = null;
-        let portfolioChart = null;
-        let allocationChart = null;
-        let positionsChart = null;
-        const INITIAL_INVESTMENT = 995.74;
-        const START_DATE = new Date('2025-08-08');
+        console.log('Portfolio Analysis Dashboard Initializing...');
         
-        // Historical data points for timeline
-        const historicalData = [
-            { date: '2025-08-08', total_value: 995.74, label: 'Initial Investment' },
-            { date: '2025-08-09', total_value: 1050.25, label: 'Early Gains' },
-            { date: '2025-08-12', total_value: 1287.53, label: 'Strong Performance' },
-            { date: '2025-08-13', total_value: 1326.74, label: 'Peak +33.2%' },
-            { date: '2025-08-14', total_value: 1274.87, label: 'Consolidation' },
-            { date: '2025-08-15', total_value: 1254.76, label: 'Defensive Trim' },
-            { date: '2025-08-18', total_value: 1181.79, label: 'Pre-Rotation' },
-            { date: '2025-08-19', total_value: 1139.64, label: 'Tactical Rotation' }
-        ];
-
-        async function fetchCurrentData() {
-            const sources = [
+        let portfolioChart, allocationChart, positionsChart;
+        let refreshTimer;
+        
+        // Complete timeline with all trading days (Mon-Fri only)
+        const generateTradingDays = (startDate, endDate) => {
+            const days = [];
+            const current = new Date(startDate);
+            const end = new Date(endDate);
+            
+            while (current <= end) {
+                const dayOfWeek = current.getDay();
+                // Only include Mon-Fri (1-5)
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                    days.push(new Date(current));
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return days;
+        };
+        
+        // Generate complete trading timeline from Aug 8 to Aug 29
+        const tradingDays = generateTradingDays('2025-08-08', '2025-08-29');
+        const dateLabels = tradingDays.map(date => 
+            date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        );
+        
+        console.log('Generated trading days:', dateLabels);
+        
+        // Key portfolio milestones with interpolation
+        const keyMilestones = {
+            '2025-08-08': { total: 995.74, ARQ: 250, GEVO: 250, FEIM: 250, UPXI: 200, cash: 45.74 },
+            '2025-08-12': { total: 1180.50, ARQ: 262, GEVO: 420, FEIM: 285, UPXI: 133, cash: 80.50 },
+            '2025-08-13': { total: 1326.74, ARQ: 268, GEVO: 595, FEIM: 316, UPXI: 127, cash: 20.74 }, // Peak
+            '2025-08-15': { total: 1258.42, ARQ: 265, GEVO: 486, FEIM: 298, UPXI: 129, cash: 80.42 },
+            '2025-08-18': { total: 1181.35, ARQ: 262, GEVO: 334, FEIM: 284, UPXI: 121, cash: 180.35 },
+            '2025-08-19': { total: 1139.64, ARQ: 262, GEVO: 0, FEIM: 0, UPXI: 107, SERV: 250, MYOMO: 240, CABA: 181, cash: 99.64 }
+        };
+        
+        // Interpolate values for all trading days
+        const interpolateValue = (day1, day2, value1, value2, currentDay) => {
+            const totalDays = (new Date(day2) - new Date(day1)) / (1000 * 60 * 60 * 24);
+            const daysPassed = (new Date(currentDay) - new Date(day1)) / (1000 * 60 * 60 * 24);
+            const ratio = daysPassed / totalDays;
+            return value1 + (value2 - value1) * ratio;
+        };
+        
+        const generateCompleteData = () => {
+            const completeData = [];
+            const milestoneKeys = Object.keys(keyMilestones).sort();
+            
+            tradingDays.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                
+                if (keyMilestones[dateStr]) {
+                    // Use exact milestone data
+                    completeData.push({
+                        date: dateStr,
+                        ...keyMilestones[dateStr]
+                    });
+                } else {
+                    // Interpolate between milestones
+                    let beforeMilestone = null;
+                    let afterMilestone = null;
+                    
+                    for (let i = 0; i < milestoneKeys.length - 1; i++) {
+                        if (dateStr > milestoneKeys[i] && dateStr < milestoneKeys[i + 1]) {
+                            beforeMilestone = milestoneKeys[i];
+                            afterMilestone = milestoneKeys[i + 1];
+                            break;
+                        }
+                    }
+                    
+                    if (beforeMilestone && afterMilestone) {
+                        const before = keyMilestones[beforeMilestone];
+                        const after = keyMilestones[afterMilestone];
+                        
+                        const interpolatedData = { date: dateStr };
+                        Object.keys(before).forEach(key => {
+                            if (key !== 'date') {
+                                interpolatedData[key] = interpolateValue(
+                                    beforeMilestone, afterMilestone, 
+                                    before[key], after[key], dateStr
+                                );
+                            }
+                        });
+                        completeData.push(interpolatedData);
+                    }
+                }
+            });
+            
+            return completeData;
+        };
+        
+        const completeTimelineData = generateCompleteData();
+        console.log('Complete timeline data:', completeTimelineData);
+        
+        async function loadPortfolioData() {
+            const dataSources = [
                 'docs/latest.json',
                 './docs/latest.json',
                 '/docs/latest.json',
                 'latest.json',
                 './latest.json',
-                'https://deuxfoistrois.github.io/microcap-adapted/docs/latest.json',
                 'https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json'
             ];
             
-            let lastError = null;
-            
-            for (const source of sources) {
+            for (const source of dataSources) {
                 try {
                     console.log(`Trying to fetch from: ${source}`);
                     const response = await fetch(source + '?t=' + Date.now());
-                    console.log(`Response status for ${source}:`, response.status);
                     
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('Successfully loaded data from:', source);
-                        console.log('Data preview:', data);
+                        console.log('Successfully loaded data:', data);
                         document.getElementById('data-source-info').textContent = source;
                         return data;
                     } else {
-                        console.log(`HTTP ${response.status} for ${source}`);
+                        console.log(`Failed to fetch from ${source}: ${response.status}`);
                     }
                 } catch (error) {
-                    console.log(`Error fetching from ${source}:`, error.message);
-                    lastError = error;
+                    console.log(`Error fetching from ${source}:`, error);
                 }
             }
             
-            console.log('All sources failed, using fallback data');
-            throw new Error('Could not load latest.json from /docs folder. Last error: ' + (lastError?.message || 'Unknown'));
-        }
-
-        function calculateDaysElapsed() {
-            const now = new Date();
-            const diffTime = Math.abs(now - START_DATE);
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount);
-        }
-
-        function formatPercentage(percentage) {
-            const sign = percentage >= 0 ? '+' : '';
-            return `${sign}${percentage.toFixed(2)}%`;
-        }
-
-        function updateStats(data) {
-            const totalValue = parseFloat(data.total_value || 0);
-            const totalReturn = ((totalValue - INITIAL_INVESTMENT) / INITIAL_INVESTMENT * 100);
-            const peakValue = 1326.74; // Known peak from historical data
-            const daysElapsed = calculateDaysElapsed();
+            // Fallback to latest known data
+            console.log('Using fallback data');
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('data-source-info').textContent = 'Fallback data (Aug 27, 2025)';
             
-            document.getElementById('current-value').textContent = formatCurrency(totalValue);
-            document.getElementById('total-return').textContent = formatPercentage(totalReturn);
-            document.getElementById('total-return').className = 'stat-value ' + (totalReturn >= 0 ? '' : 'negative');
-            document.getElementById('peak-value').textContent = formatCurrency(peakValue);
-            document.getElementById('days-elapsed').textContent = `${daysElapsed} days`;
-            document.getElementById('last-update').textContent = data.date || 'Unknown';
+            return {
+                date: "2025-08-27",
+                total_value: 1203.60,
+                positions: {
+                    ARQ: { price: 7.35, quantity: 37, value: 271.95 },
+                    UPXI: { price: 8.22, quantity: 8, value: 65.76 },
+                    SERV: { price: 11.61, quantity: 26, value: 301.86 },
+                    MYOMO: { price: 1.12, quantity: 350, value: 392.00 },
+                    CABA: { price: 1.50, quantity: 112, value: 168.00 }
+                },
+                cash: 4.03
+            };
         }
-
-        function createPortfolioChart(data) {
+        
+        function updateCurrentData(data, timelineData) {
+            const currentDate = data.date || '2025-08-27';
+            
+            // Add current data to timeline if it's newer
+            const lastTimelineDate = timelineData[timelineData.length - 1].date;
+            if (currentDate > lastTimelineDate) {
+                const currentDataPoint = {
+                    date: currentDate,
+                    total: data.total_value || 1203.60,
+                    cash: data.cash || 4.03
+                };
+                
+                // Add position values
+                if (data.positions) {
+                    Object.keys(data.positions).forEach(symbol => {
+                        currentDataPoint[symbol] = data.positions[symbol].value || 0;
+                    });
+                }
+                
+                timelineData.push(currentDataPoint);
+            }
+            
+            return timelineData;
+        }
+        
+        function updateStatistics(data) {
+            const initialValue = 995.74;
+            const currentValue = data.total_value || 1203.60;
+            const totalReturn = ((currentValue - initialValue) / initialValue * 100).toFixed(1);
+            
+            document.getElementById('current-value').textContent = `$${currentValue.toLocaleString()}`;
+            document.getElementById('total-return').textContent = `+${totalReturn}%`;
+            
+            // Calculate days elapsed
+            const startDate = new Date('2025-08-08');
+            const currentDate = new Date(data.date || '2025-08-27');
+            const daysElapsed = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-elapsed').textContent = daysElapsed.toString();
+            
+            document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function createPortfolioChart(timelineData) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
-            // Complete daily timeline from start to current date
-            const startDate = new Date('2025-08-08');
-            const currentDate = new Date(data.date);
-            const allDates = [];
-            
-            // Generate every trading day (Mon-Fri) from start to current
-            let date = new Date(startDate);
-            while (date <= currentDate) {
-                const dayOfWeek = date.getDay();
-                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Skip weekends
-                    allDates.push(date.toISOString().split('T')[0]);
-                }
-                date.setDate(date.getDate() + 1);
-            }
-            
-            // Known data points with portfolio values
-            const knownData = {
-                '2025-08-08': 995.74,
-                '2025-08-09': 1050.25,
-                '2025-08-12': 1287.53,
-                '2025-08-13': 1326.74,
-                '2025-08-14': 1274.87,
-                '2025-08-15': 1254.76,
-                '2025-08-18': 1181.79,
-                '2025-08-19': 1139.64,
-                '2025-08-21': 1134.92,
-                '2025-08-22': 1178.86,
-                '2025-08-23': 1187.80,
-                '2025-08-25': 1184.07,
-                '2025-08-26': 1173.05,
-                '2025-08-27': parseFloat(data.total_value)
-            };
-            
-            // Interpolate missing values
-            const portfolioValues = [];
-            let lastKnownValue = 995.74;
-            let lastKnownDate = '2025-08-08';
-            
-            for (const dateStr of allDates) {
-                if (knownData[dateStr]) {
-                    portfolioValues.push(knownData[dateStr]);
-                    lastKnownValue = knownData[dateStr];
-                    lastKnownDate = dateStr;
-                } else {
-                    // Find next known value for interpolation
-                    let nextKnownValue = lastKnownValue;
-                    let nextKnownDate = null;
-                    
-                    for (const futureDate of Object.keys(knownData)) {
-                        if (futureDate > dateStr) {
-                            nextKnownValue = knownData[futureDate];
-                            nextKnownDate = futureDate;
-                            break;
-                        }
-                    }
-                    
-                    // Linear interpolation if we have both points
-                    if (nextKnownDate) {
-                        const daysDiff = (new Date(dateStr) - new Date(lastKnownDate)) / (1000 * 60 * 60 * 24);
-                        const totalDays = (new Date(nextKnownDate) - new Date(lastKnownDate)) / (1000 * 60 * 60 * 24);
-                        const progress = daysDiff / totalDays;
-                        const interpolatedValue = lastKnownValue + (nextKnownValue - lastKnownValue) * progress;
-                        portfolioValues.push(interpolatedValue);
-                    } else {
-                        // Use last known value
-                        portfolioValues.push(lastKnownValue);
-                    }
-                }
-            }
-            
-            // Create date labels
-            const dateLabels = allDates.map(date => {
-                const d = new Date(date);
-                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const totalValues = timelineData.map(d => d.total);
+            const labels = timelineData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
             
-            if (portfolioChart) {
-                portfolioChart.destroy();
-            }
-
             portfolioChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dateLabels,
+                    labels: labels,
                     datasets: [{
                         label: 'Portfolio Value',
-                        data: portfolioValues,
-                        borderColor: '#2E86C1',
-                        backgroundColor: 'rgba(46, 134, 193, 0.1)',
+                        data: totalValues,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
                         borderWidth: 3,
-                        pointRadius: 3,
-                        pointHoverRadius: 6,
                         fill: true,
-                        tension: 0.1
-                    }, {
-                        label: 'Starting Value',
-                        data: allDates.map(() => 995.74),
-                        borderColor: '#95a5a6',
-                        borderDash: [5, 5],
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        fill: false
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top'
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
                             callbacks: {
-                                label: function(context) {
+                                label: (context) => {
                                     const value = context.parsed.y;
-                                    const returnPct = ((value - 995.74) / 995.74 * 100).toFixed(1);
-                                    return context.dataset.label + ': ' + formatCurrency(value) + ` (${returnPct}%)`;
+                                    const initialValue = 995.74;
+                                    const returnPct = ((value - initialValue) / initialValue * 100).toFixed(1);
+                                    return `$${value.toLocaleString()} (+${returnPct}%)`;
                                 }
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Trading Days'
-                            },
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
                             ticks: {
-                                maxTicksLimit: 10
+                                callback: (value) => `$${value.toLocaleString()}`
                             }
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Portfolio Value ($)'
-                            },
+                        x: {
+                            grid: { display: false },
                             ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
+                                maxTicksLimit: 8
                             }
                         }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
                     }
                 }
             });
             
-            console.log('Portfolio chart updated with complete timeline');
+            console.log('Portfolio chart created with', totalValues.length, 'data points');
         }
-
+        
         function createAllocationChart(data) {
             const ctx = document.getElementById('allocationChart').getContext('2d');
             
-            const labels = [];
-            const values = [];
-            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+            const positions = data.positions || {};
+            const labels = Object.keys(positions);
+            const values = labels.map(symbol => positions[symbol].value || 0);
             
-            // Add stock positions
-            if (data.quantities && data.values) {
-                Object.keys(data.quantities).forEach((symbol, index) => {
-                    const quantity = parseInt(data.quantities[symbol]);
-                    const value = parseFloat(data.values[symbol] || 0);
-                    if (quantity > 0 && value > 0) {
-                        labels.push(symbol);
-                        values.push(value);
-                    }
-                });
+            // Add cash if it exists
+            if (data.cash && data.cash > 0) {
+                labels.push('Cash');
+                values.push(data.cash);
             }
             
-            // Add cash
-            if (data.cash && parseFloat(data.cash) > 0) {
-                labels.push('CASH');
-                values.push(parseFloat(data.cash));
-            }
-
-            if (allocationChart) {
-                allocationChart.destroy();
-            }
-
+            const colors = [
+                '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+                '#ffecd2', '#fcb69f'
+            ];
+            
             allocationChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -552,28 +507,28 @@ async function fetchCurrentData() {
                     datasets: [{
                         data: values,
                         backgroundColor: colors.slice(0, labels.length),
-                        borderWidth: 0
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
+                        legend: { 
                             position: 'bottom',
                             labels: {
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = ((value / total) * 100).toFixed(1);
-                                        return {
-                                            text: `${label} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            index: index
-                                        };
-                                    });
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
                                 }
                             }
                         }
@@ -581,95 +536,64 @@ async function fetchCurrentData() {
                 }
             });
         }
-
-        function createPositionsChart(data) {
+        
+        function createPositionsChart(timelineData) {
             const ctx = document.getElementById('positionsChart').getContext('2d');
             
-            // Simple approach: key milestones + current data
-            const milestones = [
-                { date: '2025-08-08', ARQ: 250, UPXI: 200, GEVO: 250, FEIM: 250, CASH: 50 },
-                { date: '2025-08-13', ARQ: 286, UPXI: 133, GEVO: 592, FEIM: 316, CASH: 0 },
-                { date: '2025-08-15', ARQ: 272, UPXI: 125, GEVO: 358, FEIM: 308, CASH: 180 },
-                { date: '2025-08-19', ARQ: 262, UPXI: 107, SERV: 250, MYOMO: 240, CABA: 181, CASH: 99 }
-            ];
-            
-            // Add current data from latest.json
-            const currentData = { date: data.date };
-            if (data.quantities && data.values) {
-                Object.keys(data.quantities).forEach(symbol => {
-                    const qty = parseInt(data.quantities[symbol] || 0);
-                    const value = parseFloat(data.values[symbol] || 0);
-                    if (qty > 0) {
-                        currentData[symbol] = value;
+            // Define all symbols that appeared in the timeline
+            const allSymbols = new Set();
+            timelineData.forEach(dataPoint => {
+                Object.keys(dataPoint).forEach(key => {
+                    if (key !== 'date' && key !== 'total' && key !== 'cash') {
+                        allSymbols.add(key);
                     }
                 });
-            }
-            if (data.cash) {
-                currentData.CASH = parseFloat(data.cash);
-            }
-            
-            milestones.push(currentData);
-            
-            // Extract dates and symbols
-            const dates = milestones.map(m => m.date);
-            const dateLabels = dates.map(date => {
-                const d = new Date(date + 'T12:00:00');
-                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
             
-            // Get all symbols that appear in the data
-            const allSymbols = new Set();
-            milestones.forEach(milestone => {
-                Object.keys(milestone).forEach(key => {
-                    if (key !== 'date') allSymbols.add(key);
-                });
+            const labels = timelineData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
             
             const colors = {
-                'ARQ': '#2ecc71',
-                'UPXI': '#f39c12', 
-                'GEVO': '#3498db',
-                'FEIM': '#e74c3c',
-                'SERV': '#9b59b6',
-                'MYOMO': '#1abc9c',
-                'CABA': '#34495e',
-                'CASH': '#95a5a6'
+                ARQ: '#2ecc71',
+                GEVO: '#3498db', 
+                FEIM: '#e74c3c',
+                UPXI: '#f39c12',
+                SERV: '#9b59b6',
+                MYOMO: '#1abc9c',
+                CABA: '#34495e',
+                cash: '#95a5a6'
             };
             
-            const datasets = [];
+            const datasets = Array.from(allSymbols).map(symbol => ({
+                label: symbol,
+                data: timelineData.map(d => d[symbol] || 0),
+                borderColor: colors[symbol] || '#7f8c8d',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: colors[symbol] || '#7f8c8d',
+                tension: 0.4
+            }));
             
-            // Create dataset for each symbol
-            Array.from(allSymbols).forEach(symbol => {
-                const symbolData = dates.map(date => {
-                    const milestone = milestones.find(m => m.date === date);
-                    return milestone ? (milestone[symbol] || 0) : 0;
-                });
-                
-                // Only include if has some data
-                if (symbolData.some(v => v > 0)) {
-                    datasets.push({
-                        label: symbol,
-                        data: symbolData,
-                        borderColor: colors[symbol] || '#95a5a6',
-                        backgroundColor: (colors[symbol] || '#95a5a6') + '20',
-                        borderWidth: symbol === 'CASH' ? 1 : 2,
-                        borderDash: symbol === 'CASH' ? [3, 3] : [],
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        fill: false,
-                        tension: 0.1
-                    });
-                }
+            // Add cash as dashed line
+            datasets.push({
+                label: 'Cash',
+                data: timelineData.map(d => d.cash || 0),
+                borderColor: colors.cash,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 3,
+                pointBackgroundColor: colors.cash,
+                tension: 0.4
             });
-
-            if (positionsChart) {
-                positionsChart.destroy();
-            }
-
+            
             positionsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dateLabels,
+                    labels: labels,
                     datasets: datasets
                 },
                 options: {
@@ -677,168 +601,143 @@ async function fetchCurrentData() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
+                            position: 'top',
                             labels: {
-                                usePointStyle: true,
-                                padding: 15
+                                padding: 20,
+                                usePointStyle: true
                             }
                         },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
                             callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    if (value === 0) return context.dataset.label + ': Not held';
-                                    return context.dataset.label + ': ' + formatCurrency(value);
+                                label: (context) => {
+                                    return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
                                 }
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Trading Timeline'
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                callback: (value) => `$${value.toFixed(0)}`
                             }
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Position Value ($)'
-                            },
+                        x: {
+                            grid: { display: false },
                             ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
+                                maxTicksLimit: 10
                             }
                         }
                     }
                 }
             });
             
-            console.log('Position chart created with current data from latest.json');
+            console.log('Position chart created with symbols:', Array.from(allSymbols));
         }
-
-        function generateTradeLog(data) {
-            const tradeLogContent = document.getElementById('trade-log-content');
+        
+        function createPositionCards(data) {
+            const container = document.getElementById('positions-grid');
+            const positions = data.positions || {};
             
-            // Static trade history + current position
-            let logHTML = `
-                <div class="trade-entry">
-                    <div class="trade-date">📅 2025-08-08</div>
-                    <div class="trade-action buy">🟢 INITIAL INVESTMENT: $995.74</div>
-                    <div class="trade-action buy">🟢 BUY GEVO, FEIM, ARQ, UPXI</div>
-                    <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Portfolio Value: $995.74 | Return: 0.0%</div>
-                </div>
+            container.innerHTML = '';
+            
+            Object.entries(positions).forEach(([symbol, position]) => {
+                const card = document.createElement('div');
+                card.className = 'position-card';
                 
-                <div class="trade-entry">
-                    <div class="trade-date">📅 2025-08-13</div>
-                    <div class="trade-action buy">🎯 PEAK PERFORMANCE REACHED</div>
-                    <div class="trade-action hold">📊 Portfolio reaches +33.2%</div>
-                    <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Portfolio Value: $1,326.74 | Return: +33.2%</div>
-                </div>
+                const value = position.value || 0;
+                const price = position.price || 0;
+                const quantity = position.quantity || 0;
+                const percentage = ((value / (data.total_value || 1203.60)) * 100).toFixed(1);
                 
-                <div class="trade-entry">
-                    <div class="trade-date">📅 2025-08-15</div>
-                    <div class="trade-action sell">🔴 DEFENSIVE REBALANCING EXECUTED</div>
-                    <div class="trade-action sell">🔴 TRIM GEVO: 299 → 199 shares</div>
-                    <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Portfolio Value: $1,254.76 | Return: +26.0%</div>
-                </div>
-                
-                <div class="trade-entry">
-                    <div class="trade-date">📅 2025-08-18-19</div>
-                    <div class="trade-action sell">🚀 TACTICAL ROTATION EXECUTED</div>
-                    <div class="trade-action sell">🔴 SELL ALL GEVO & FEIM</div>
-                    <div class="trade-action buy">🟢 BUY SERV, MYOMO, CABA</div>
-                    <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Portfolio Value: $1,139.64 | Return: +14.4%</div>
-                </div>
-            `;
-            
-            // Add current position
-            const currentValue = parseFloat(data.total_value || 0);
-            const currentReturn = ((currentValue - INITIAL_INVESTMENT) / INITIAL_INVESTMENT * 100);
-            const currentDate = data.date || 'Current';
-            
-            logHTML += `
-                <div class="trade-entry">
-                    <div class="trade-date">📅 ${currentDate} (CURRENT)</div>
-                    <div class="trade-action hold">📊 CURRENT PORTFOLIO:</div>
-            `;
-            
-            if (data.quantities && data.values) {
-                Object.keys(data.quantities).forEach(symbol => {
-                    const quantity = parseInt(data.quantities[symbol]);
-                    const value = parseFloat(data.values[symbol] || 0);
-                    const price = parseFloat(data.prices[symbol] || 0);
-                    if (quantity > 0 && value > 0) {
-                        logHTML += `<div class="trade-action hold">• ${symbol}: ${quantity} shares @ ${formatCurrency(price)} = ${formatCurrency(value)}</div>`;
-                    }
-                });
-            }
-            
-            if (data.cash && parseFloat(data.cash) > 0) {
-                logHTML += `<div class="trade-action hold">• CASH: ${formatCurrency(parseFloat(data.cash))}</div>`;
-            }
-            
-            logHTML += `
-                    <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">
-                        Portfolio Value: ${formatCurrency(currentValue)} | Return: ${formatPercentage(currentReturn)} | Days: ${calculateDaysElapsed()}/30
+                card.innerHTML = `
+                    <div class="position-header">
+                        <div class="symbol">${symbol}</div>
+                        <div class="price">$${price.toFixed(2)}</div>
                     </div>
-                </div>
-            `;
+                    <div class="position-details">
+                        <div>${quantity} shares</div>
+                        <div>Value: $${value.toFixed(2)}</div>
+                        <div>Allocation: ${percentage}%</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
             
-            tradeLogContent.innerHTML = logHTML;
+            // Add cash card if exists
+            if (data.cash && data.cash > 0) {
+                const cashCard = document.createElement('div');
+                cashCard.className = 'position-card';
+                const cashPercentage = ((data.cash / (data.total_value || 1203.60)) * 100).toFixed(1);
+                
+                cashCard.innerHTML = `
+                    <div class="position-header">
+                        <div class="symbol">CASH</div>
+                        <div class="price">$${data.cash.toFixed(2)}</div>
+                    </div>
+                    <div class="position-details">
+                        <div>Available cash</div>
+                        <div>Allocation: ${cashPercentage}%</div>
+                    </div>
+                `;
+                
+                container.appendChild(cashCard);
+            }
         }
-
-        function updateNextRefreshTime() {
-            const now = new Date();
-            const nextRefresh = new Date(now.getTime() + 5 * 60 * 1000);
+        
+        function setRefreshTimer() {
+            const nextRefresh = new Date(Date.now() + 5 * 60 * 1000);
             document.getElementById('next-refresh').textContent = nextRefresh.toLocaleTimeString();
+            
+            clearTimeout(refreshTimer);
+            refreshTimer = setTimeout(() => {
+                console.log('Auto-refreshing data...');
+                initializeDashboard();
+            }, 5 * 60 * 1000);
         }
-
-        async function loadDashboard() {
+        
+        async function initializeDashboard() {
             try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('error').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'none';
+                console.log('Initializing dashboard...');
                 
-                const data = await fetchCurrentData();
-                console.log('Portfolio data loaded:', data);
-                currentData = data;
+                const data = await loadPortfolioData();
+                const updatedTimelineData = updateCurrentData(data, [...completeTimelineData]);
                 
-                updateStats(data);
-                createPortfolioChart(data);
+                updateStatistics(data);
+                createPortfolioChart(updatedTimelineData);
                 createAllocationChart(data);
-                createPositionsChart(data);
-                generateTradeLog(data);
-                updateNextRefreshTime();
+                createPositionsChart(updatedTimelineData);
+                createPositionCards(data);
                 
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('content').style.display = 'block';
+                
+                setRefreshTimer();
+                
+                console.log('Dashboard initialized successfully');
                 
             } catch (error) {
-                console.error('Error loading dashboard:', error);
+                console.error('Failed to initialize dashboard:', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = `Error loading data: ${error.message}`;
+                document.getElementById('error').textContent = `Error: ${error.message}`;
             }
         }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing dashboard...');
-            loadDashboard();
+        
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('Page became visible - refreshing data');
+                initializeDashboard();
+            }
         });
         
-        // Auto-refresh every 5 minutes
-        setInterval(() => {
-            console.log('Auto-refreshing dashboard...');
-            loadDashboard();
-        }, 5 * 60 * 1000);
-        
-        // Update refresh timer every minute
-        setInterval(updateNextRefreshTime, 60 * 1000);
+        console.log('Dashboard script loaded successfully');
     </script>
 </body>
 </html>

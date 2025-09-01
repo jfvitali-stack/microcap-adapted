@@ -408,15 +408,26 @@
         
         function updateStatistics(data) {
             const initialValue = 995.74;
-            const currentValue = data.total_value || 1203.60;
+            const currentValue = parseFloat(data.total_value) || 1166.01;
             const totalReturn = ((currentValue - initialValue) / initialValue * 100).toFixed(1);
             
-            document.getElementById('current-value').textContent = `$${currentValue.toLocaleString()}`;
+            // Calculate daily change from data if available
+            let dailyChange = 0;
+            if (data.daily_changes && data.daily_changes.portfolio) {
+                dailyChange = parseFloat(data.daily_changes.portfolio.total_change) || 0;
+            }
+            
+            document.getElementById('current-value').textContent = `${currentValue.toLocaleString()}`;
             document.getElementById('total-return').textContent = `+${totalReturn}%`;
+            
+            const changeColor = dailyChange >= 0 ? '#27ae60' : '#e74c3c';
+            const changePrefix = dailyChange >= 0 ? '+' : '';
+            document.getElementById('daily-change').textContent = `${changePrefix}${dailyChange.toFixed(2)}`;
+            document.getElementById('daily-change').style.color = changeColor;
             
             // Calculate days elapsed
             const startDate = new Date('2025-08-08');
-            const currentDate = new Date(data.date || '2025-08-27');
+            const currentDate = new Date(data.date || '2025-08-31');
             const daysElapsed = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
             document.getElementById('days-elapsed').textContent = daysElapsed.toString();
             
@@ -492,18 +503,28 @@
             
             console.log('Creating allocation chart with data:', data);
             
-            const positions = data.positions || {};
             const labels = [];
             const values = [];
             
-            // Parse positions - handle different data structures
-            Object.entries(positions).forEach(([symbol, position]) => {
-                const value = parseFloat(position.value || position) || 0;
-                if (value > 0) {
-                    labels.push(symbol);
-                    values.push(value);
-                }
-            });
+            // Handle your actual JSON structure with separate values object
+            if (data.values) {
+                Object.entries(data.values).forEach(([symbol, value]) => {
+                    const numValue = parseFloat(value) || 0;
+                    if (numValue > 0) {
+                        labels.push(symbol);
+                        values.push(numValue);
+                    }
+                });
+            } else if (data.positions) {
+                // Fallback for nested positions structure
+                Object.entries(data.positions).forEach(([symbol, position]) => {
+                    const value = parseFloat(position.value || position) || 0;
+                    if (value > 0) {
+                        labels.push(symbol);
+                        values.push(value);
+                    }
+                });
+            }
             
             // Add cash if it exists
             const cashAmount = parseFloat(data.cash) || 0;

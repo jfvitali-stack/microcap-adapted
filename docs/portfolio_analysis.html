@@ -437,6 +437,13 @@
         function createPortfolioChart(timelineData) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
+            // Destroy existing chart if it exists
+            if (portfolioChart) {
+                console.log('Destroying existing portfolio chart');
+                portfolioChart.destroy();
+                portfolioChart = null;
+            }
+            
             const totalValues = timelineData.map(d => d.total);
             const labels = timelineData.map(d => {
                 const date = new Date(d.date);
@@ -472,7 +479,7 @@
                                     const value = context.parsed.y;
                                     const initialValue = 995.74;
                                     const returnPct = ((value - initialValue) / initialValue * 100).toFixed(1);
-                                    return `$${value.toLocaleString()} (+${returnPct}%)`;
+                                    return `${value.toLocaleString()} (+${returnPct}%)`;
                                 }
                             }
                         }
@@ -482,7 +489,7 @@
                             beginAtZero: false,
                             grid: { color: 'rgba(0,0,0,0.05)' },
                             ticks: {
-                                callback: (value) => `$${value.toLocaleString()}`
+                                callback: (value) => `${value.toLocaleString()}`
                             }
                         },
                         x: {
@@ -502,6 +509,13 @@
             const ctx = document.getElementById('allocationChart').getContext('2d');
             
             console.log('Creating allocation chart with data:', data);
+            
+            // Destroy existing chart if it exists
+            if (allocationChart) {
+                console.log('Destroying existing allocation chart');
+                allocationChart.destroy();
+                allocationChart = null;
+            }
             
             const labels = [];
             const values = [];

@@ -490,15 +490,30 @@
         function createAllocationChart(data) {
             const ctx = document.getElementById('allocationChart').getContext('2d');
             
+            console.log('Creating allocation chart with data:', data);
+            
             const positions = data.positions || {};
-            const labels = Object.keys(positions);
-            const values = labels.map(symbol => positions[symbol].value || 0);
+            const labels = [];
+            const values = [];
+            
+            // Parse positions - handle different data structures
+            Object.entries(positions).forEach(([symbol, position]) => {
+                const value = parseFloat(position.value || position) || 0;
+                if (value > 0) {
+                    labels.push(symbol);
+                    values.push(value);
+                }
+            });
             
             // Add cash if it exists
-            if (data.cash && data.cash > 0) {
+            const cashAmount = parseFloat(data.cash) || 0;
+            if (cashAmount > 0) {
                 labels.push('Cash');
-                values.push(data.cash);
+                values.push(cashAmount);
             }
+            
+            console.log('Allocation chart labels:', labels);
+            console.log('Allocation chart values:', values);
             
             const colors = [
                 '#667eea', '#764ba2', '#f093fb', '#f5576c',

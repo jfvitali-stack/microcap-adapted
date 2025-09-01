@@ -382,25 +382,37 @@
         }
         
         function updateCurrentData(data, timelineData) {
-            const currentDate = data.date || '2025-08-27';
+            const currentDate = data.date || '2025-08-31';
             
             // Add current data to timeline if it's newer
             const lastTimelineDate = timelineData[timelineData.length - 1].date;
             if (currentDate > lastTimelineDate) {
                 const currentDataPoint = {
                     date: currentDate,
-                    total: data.total_value || 1203.60,
-                    cash: data.cash || 4.03
+                    total: parseFloat(data.total_value) || 1166.01,
+                    cash: parseFloat(data.cash) || 4.03
                 };
                 
-                // Add position values
-                if (data.positions) {
+                // Add position values from your actual JSON structure
+                if (data.values) {
+                    Object.entries(data.values).forEach(([symbol, value]) => {
+                        currentDataPoint[symbol] = parseFloat(value) || 0;
+                    });
+                } else if (data.positions) {
                     Object.keys(data.positions).forEach(symbol => {
-                        currentDataPoint[symbol] = data.positions[symbol].value || 0;
+                        currentDataPoint[symbol] = parseFloat(data.positions[symbol].value) || 0;
                     });
                 }
                 
+                // Set positions you don't currently hold to 0
+                ['GEVO', 'FEIM'].forEach(symbol => {
+                    if (!currentDataPoint[symbol]) {
+                        currentDataPoint[symbol] = 0;
+                    }
+                });
+                
                 timelineData.push(currentDataPoint);
+                console.log('Added current data point for', currentDate, ':', currentDataPoint);
             }
             
             return timelineData;

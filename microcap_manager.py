@@ -120,7 +120,6 @@ def calculate_portfolio_metrics(portfolio_df: pd.DataFrame, cash: float) -> dict
         "num_positions": len(positions)
     }
 
-    
 
 
 def check_stop_losses(portfolio_df: pd.DataFrame, cash: float) -> tuple[pd.DataFrame, float, list]:
@@ -161,8 +160,6 @@ def check_stop_losses(portfolio_df: pd.DataFrame, cash: float) -> tuple[pd.DataF
         portfolio_df = portfolio_df[portfolio_df["ticker"] != stop["ticker"]]
 
     return portfolio_df, cash, triggered_stops
-
-
 def log_trade(action: str, ticker: str, shares: float, price: float, reason: str):
     """Log all trading decisions and executions."""
     trade_data = {

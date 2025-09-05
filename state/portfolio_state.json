@@ -2,29 +2,29 @@
     "GEVO": {
         "symbol": "GEVO",
         "entry_price": 1.1,
-        "current_price": 1.13,
-        "trailing_stop_pct": 0.05,
-        "max_price": 1.2
+        "max_price": 1.2,
+        "current_price": 1.07,
+        "trailing_stop_pct": 0.1
     },
     "FEIM": {
         "symbol": "FEIM",
-        "entry_price": 27.0,
-        "current_price": 25.0,
-        "trailing_stop_pct": 0.05,
-        "max_price": 28.0
+        "entry_price": 29.0,
+        "max_price": 32.0,
+        "current_price": 28.5,
+        "trailing_stop_pct": 0.1
     },
     "ARQ": {
         "symbol": "ARQ",
-        "entry_price": 6.0,
-        "current_price": 5.5,
-        "trailing_stop_pct": 0.05,
-        "max_price": 6.2
+        "entry_price": 6.5,
+        "max_price": 7.2,
+        "current_price": 6.4,
+        "trailing_stop_pct": 0.1
     },
     "UPXI": {
         "symbol": "UPXI",
-        "entry_price": 5.0,
-        "current_price": 4.5,
-        "trailing_stop_pct": 0.05,
-        "max_price": 5.2
+        "entry_price": 6.0,
+        "max_price": 6.8,
+        "current_price": 6.0,
+        "trailing_stop_pct": 0.1
     }
 }

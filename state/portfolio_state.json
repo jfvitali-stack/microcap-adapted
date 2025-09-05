@@ -1,9 +1,30 @@
 {
-  "GEVO": {
-    "symbol": "GEVO",
-    "entry_price": 1.10,
-    "current_price": 0.94,
-    "trailing_stop_pct": 0.05,
-    "max_price": 1.20
-  }
+    "GEVO": {
+        "symbol": "GEVO",
+        "entry_price": 1.1,
+        "current_price": 1.13,
+        "trailing_stop_pct": 0.05,
+        "max_price": 1.2
+    },
+    "FEIM": {
+        "symbol": "FEIM",
+        "entry_price": 27.0,
+        "current_price": 25.0,
+        "trailing_stop_pct": 0.05,
+        "max_price": 28.0
+    },
+    "ARQ": {
+        "symbol": "ARQ",
+        "entry_price": 6.0,
+        "current_price": 5.5,
+        "trailing_stop_pct": 0.05,
+        "max_price": 6.2
+    },
+    "UPXI": {
+        "symbol": "UPXI",
+        "entry_price": 5.0,
+        "current_price": 4.5,
+        "trailing_stop_pct": 0.05,
+        "max_price": 5.2
+    }
 }

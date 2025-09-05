@@ -25,10 +25,14 @@ INITIAL_VALUE = 995.74
 
 # Current positions from our experiment
 INITIAL_PORTFOLIO = [
-    {"ticker": "GEVO", "shares": 299, "buy_price": 1.18, "stop_loss": 0.95, "cost_basis": 352.82},
-    {"ticker": "FEIM", "shares": 10, "buy_price": 29.53, "stop_loss": 26.50, "cost_basis": 295.30},
-    {"ticker": "ARQ", "shares": 37, "buy_price": 6.62, "stop_loss": 5.80, "cost_basis": 244.94},
-    {"ticker": "UPXI", "shares": 17, "buy_price": 6.04, "stop_loss": 4.75, "cost_basis": 102.68}
+    {"ticker": "GEVO", "shares": 299, "buy_price": 1.18, "cost_basis": 352.82},
+
+    {"ticker": "FEIM", "shares": 10, "buy_price": 29.53, "cost_basis": 295.30},
+
+    {"ticker": "ARQ", "shares": 37, "buy_price": 6.62, "cost_basis": 244.94},
+
+    {"ticker": "UPXI", "shares": 17, "buy_price": 6.04, "cost_basis": 102.68}
+
 ]
 
 today = datetime.today().strftime("%Y-%m-%d")
@@ -116,36 +120,49 @@ def calculate_portfolio_metrics(portfolio_df: pd.DataFrame, cash: float) -> dict
         "num_positions": len(positions)
     }
 
-def check_stop_losses(portfolio_df: pd.DataFrame, cash: float) -> tuple[pd.DataFrame, float, list]:
     """Check for stop-loss triggers and execute automatic sells."""
     tickers = portfolio_df["ticker"].tolist()
     prices = fetch_current_prices(tickers)
+TRAILING_STOP_PCT = 0.10  # 10% below the max price
+triggered_stops = []
+for idx, position in portfolio_df.iterrows():
+    ticker = position["ticker"]
+    current_price = prices.get(ticker, 0)
+    max_price = position.get("max_price", position["buy_price"])
+    dynamic_stop = max_price * (1 - TRAILING_STOP_PCT)
+    shares = position["shares"]
+    if current_price and current_price <= dynamic_stop:
+        sell_value = shares * current_price
+        cash += sell_value
+        stop_info = {
+            "ticker": ticker,
+            "shares": shares,
+            "stop_price": dynamic_stop,
+            "sell_value": sell_value
+        }
+        triggered_stops.append(stop_info)
+        log_trade("SELL", ticker, shares, current_price, "TRAILING STOP TRIGGERED")
+        print(f"🔻 TRAILING STOP TRIGGERED: {ticker} sold {shares} shares at ${current_price:.2f}")
     triggered_stops = []
     
     for idx, position in portfolio_df.iterrows():
         ticker = position["ticker"]
         current_price = prices.get(ticker, 0)
-        stop_loss = position["stop_loss"]
         shares = position["shares"]
         
-        if current_price and current_price <= stop_loss:
             # Stop loss triggered
-            sell_value = shares * stop_loss
             cash += sell_value
             
             # Log the stop-loss sale
             stop_info = {
                 "ticker": ticker,
                 "shares": shares,
-                "stop_price": stop_loss,
                 "sell_value": sell_value
             }
             triggered_stops.append(stop_info)
             
             # Log trade
-            log_trade("SELL", ticker, shares, stop_loss, "STOP LOSS TRIGGERED")
             
-            print(f"🛑 STOP LOSS TRIGGERED: {ticker} sold {shares} shares at ${stop_loss:.2f}")
     
     # Remove stopped-out positions
     for stop in triggered_stops:

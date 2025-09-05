@@ -120,55 +120,48 @@ def calculate_portfolio_metrics(portfolio_df: pd.DataFrame, cash: float) -> dict
         "num_positions": len(positions)
     }
 
-    """Check for stop-loss triggers and execute automatic sells."""
+    
+
+
+def check_stop_losses(portfolio_df: pd.DataFrame, cash: float) -> tuple[pd.DataFrame, float, list]:
+    """Check for trailing stop-loss triggers and execute automatic sells."""
     tickers = portfolio_df["ticker"].tolist()
     prices = fetch_current_prices(tickers)
-TRAILING_STOP_PCT = 0.10  # 10% below the max price
-triggered_stops = []
-for idx, position in portfolio_df.iterrows():
-    ticker = position["ticker"]
-    current_price = prices.get(ticker, 0)
-    max_price = position.get("max_price", position["buy_price"])
-    dynamic_stop = max_price * (1 - TRAILING_STOP_PCT)
-    shares = position["shares"]
-    if current_price and current_price <= dynamic_stop:
-        sell_value = shares * current_price
-        cash += sell_value
-        stop_info = {
-            "ticker": ticker,
-            "shares": shares,
-            "stop_price": dynamic_stop,
-            "sell_value": sell_value
-        }
-        triggered_stops.append(stop_info)
-        log_trade("SELL", ticker, shares, current_price, "TRAILING STOP TRIGGERED")
-        print(f"🔻 TRAILING STOP TRIGGERED: {ticker} sold {shares} shares at ${current_price:.2f}")
+    TRAILING_STOP_PCT = 0.10  # 10% below the max price
     triggered_stops = []
-    
+
     for idx, position in portfolio_df.iterrows():
         ticker = position["ticker"]
         current_price = prices.get(ticker, 0)
+        max_price = position.get("max_price", position["buy_price"])
         shares = position["shares"]
-        
-            # Stop loss triggered
+
+        # Update max price if current price is higher
+        if current_price > max_price:
+            max_price = current_price
+            portfolio_df.at[idx, "max_price"] = max_price
+
+        dynamic_stop = max_price * (1 - TRAILING_STOP_PCT)
+
+        if current_price and current_price <= dynamic_stop:
+            sell_value = shares * current_price
             cash += sell_value
-            
-            # Log the stop-loss sale
             stop_info = {
                 "ticker": ticker,
                 "shares": shares,
+                "stop_price": dynamic_stop,
                 "sell_value": sell_value
             }
             triggered_stops.append(stop_info)
-            
-            # Log trade
-            
-    
+            log_trade("SELL", ticker, shares, current_price, "TRAILING STOP TRIGGERED")
+            print(f"🔻 TRAILING STOP TRIGGERED: {ticker} sold {shares} shares at ${current_price:.2f}")
+
     # Remove stopped-out positions
     for stop in triggered_stops:
         portfolio_df = portfolio_df[portfolio_df["ticker"] != stop["ticker"]]
-    
+
     return portfolio_df, cash, triggered_stops
+
 
 def log_trade(action: str, ticker: str, shares: float, price: float, reason: str):
     """Log all trading decisions and executions."""

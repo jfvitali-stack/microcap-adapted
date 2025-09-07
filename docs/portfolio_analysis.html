@@ -228,17 +228,22 @@
             
             for (const source of sources) {
                 try {
+                    console.log(`Trying to fetch from: ${source}`);
                     const response = await fetch(source + (source.includes('?') ? '&' : '?') + 't=' + Date.now());
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Successfully loaded data:', data);
                         document.getElementById('data-source-info').textContent = source.includes('allorigins') ? 'CORS Proxy' : source;
                         return data;
+                    } else {
+                        console.log(`HTTP ${response.status} from ${source}`);
                     }
                 } catch (error) {
                     console.log(`Failed to load from ${source}:`, error);
                 }
             }
             
+            console.error('All data sources failed');
             document.getElementById('error').style.display = 'block';
             document.getElementById('error').textContent = 'Failed to load portfolio data from all sources';
             return null;

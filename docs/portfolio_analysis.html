@@ -215,14 +215,14 @@
         
         async function loadData() {
             try {
-                const response = await fetch('docs/latest.json?' + Date.now());
+                const response = await fetch('https://raw.githubusercontent.com/deuxfoistrois/microcap-adapted/main/docs/latest.json?' + Date.now());
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('data-source-info').textContent = 'docs/latest.json';
+                    document.getElementById('data-source-info').textContent = 'GitHub Raw URL';
                     return data;
                 }
             } catch (error) {
-                console.log('Failed to load data:', error);
+                console.log('Failed to load from raw URL:', error);
             }
             
             document.getElementById('error').style.display = 'block';

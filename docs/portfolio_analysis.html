@@ -366,12 +366,12 @@
         function createPositionsChart() {
             const ctx = document.getElementById('positionsChart').getContext('2d');
             
-            const dates = ['Aug 8', 'Aug 13', 'Aug 15', 'Aug 19', 'Aug 23', 'Aug 27', 'Aug 31'];
+            const dates = ['Aug 8', 'Aug 13', 'Aug 15', 'Aug 19', 'Aug 23', 'Aug 27', 'Aug 31', 'Sep 5'];
             
             const datasets = [
                 {
                     label: 'ARQ',
-                    data: [250, 268, 265, 262, 273, 272, 286],
+                    data: [250, 268, 265, 262, 273, 272, 286, 262],
                     borderColor: '#2ecc71',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -380,7 +380,7 @@
                 },
                 {
                     label: 'GEVO',
-                    data: [250, 595, 486, 0, 0, 0, 0],
+                    data: [250, 595, 486, 0, 0, 0, 0, 0],
                     borderColor: '#3498db',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -389,7 +389,7 @@
                 },
                 {
                     label: 'FEIM',
-                    data: [250, 316, 298, 0, 0, 0, 0],
+                    data: [250, 316, 298, 0, 0, 0, 0, 0],
                     borderColor: '#e74c3c',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -398,7 +398,7 @@
                 },
                 {
                     label: 'UPXI',
-                    data: [200, 127, 129, 107, 63, 66, 58],
+                    data: [200, 127, 129, 107, 63, 66, 58, 48],
                     borderColor: '#f39c12',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -407,7 +407,7 @@
                 },
                 {
                     label: 'SERV',
-                    data: [0, 0, 0, 250, 304, 302, 289],
+                    data: [0, 0, 0, 250, 304, 302, 289, 260],
                     borderColor: '#9b59b6',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -416,7 +416,7 @@
                 },
                 {
                     label: 'MYOMO',
-                    data: [0, 0, 0, 240, 413, 392, 368],
+                    data: [0, 0, 0, 240, 413, 392, 368, 349],
                     borderColor: '#1abc9c',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -425,7 +425,7 @@
                 },
                 {
                     label: 'CABA',
-                    data: [0, 0, 0, 181, 181, 168, 162],
+                    data: [0, 0, 0, 181, 181, 168, 162, 190],
                     borderColor: '#34495e',
                     backgroundColor: 'transparent',
                     borderWidth: 3,
@@ -434,7 +434,7 @@
                 },
                 {
                     label: 'Cash',
-                    data: [46, 21, 80, 100, 4, 4, 4],
+                    data: [46, 21, 80, 100, 4, 4, 4, 4],
                     borderColor: '#95a5a6',
                     backgroundColor: 'transparent',
                     borderWidth: 2,
@@ -454,7 +454,11 @@
                         legend: { position: 'top', labels: { padding: 15, usePointStyle: true } }
                     },
                     scales: {
-                        y: { beginAtZero: true, ticks: { callback: (value) => `$${value.toFixed(0)}` } }
+                        y: { beginAtZero: true, ticks: { callback: (value) => `${value.toFixed(0)}` } }
+                    }
+                }
+            });
+        }: true, ticks: { callback: (value) => `$${value.toFixed(0)}` } }
                     }
                 }
             });

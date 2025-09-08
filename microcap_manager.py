@@ -356,6 +356,20 @@ def run_daily_update(portfolio_df: pd.DataFrame, cash: float) -> tuple[pd.DataFr
     portfolio_df, cash, triggered_stops = check_stop_losses(portfolio_df, cash)
     
     # Calculate current metrics
+
+    # Update max_price and stop_loss with trailing stop logic
+    for idx, row in portfolio_df.iterrows():
+        ticker = row["ticker"]
+        current_price = prices.get(ticker, row["buy_price"])
+        if "max_price" not in portfolio_df.columns:
+            portfolio_df["max_price"] = portfolio_df["buy_price"]
+        max_price = max(current_price, row.get("max_price", row["buy_price"]))
+        if current_price > row.get("max_price", row["buy_price"]):
+            stop_loss = round(current_price * 0.88, 4)
+        else:
+            stop_loss = row["stop_loss"]
+        portfolio_df.at[idx, "max_price"] = max_price
+        portfolio_df.at[idx, "stop_loss"] = stop_loss
     metrics = calculate_portfolio_metrics(portfolio_df, cash)
     
     # Generate and display report

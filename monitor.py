@@ -53,6 +53,10 @@ def check_stop_losses():
     return warnings
 
 def check_portfolio_health():
+print("\n📊 CSV STOP-LOSS CHECK:")
+csv_warnings = check_stops_from_csv()
+for warning in csv_warnings:
+    print(f" • {warning}")
     """Comprehensive portfolio health check."""
     print("🔍 PORTFOLIO HEALTH CHECK")
     print("=" * 40)
@@ -114,6 +118,31 @@ def validate_api_connection():
     except Exception as e:
         print(f"❌ API connection failed: {e}")
         return False
+
+
+def check_stops_from_csv():
+    """Check stop-loss levels from portfolio.csv"""
+    portfolio_path = "portfolio.csv"
+    warnings = []
+
+    if not os.path.exists(portfolio_path):
+        warnings.append("No existe el archivo de portafolio (portfolio.csv).")
+        return warnings
+
+    df = pd.read_csv(portfolio_path)
+    for idx, row in df.iterrows():
+        ticker = row["ticker"]
+        current_price = row.get("current_price", row["max_price"])
+        stop_loss = row["stop_loss"]
+
+        if current_price <= stop_loss:
+            warnings.append(f"⚠️ {ticker}: El precio actual {current_price} ha tocado o bajado el stop_loss ({stop_loss})")
+        elif current_price <= stop_loss * 1.03:
+            warnings.append(f"🟠 {ticker}: El precio actual {current_price} está cerca del stop_loss ({stop_loss})")
+        else:
+            warnings.append(f"🟢 {ticker}: Todo ok. Precio actual {current_price}, stop_loss {stop_loss}")
+    return warnings
+
 
 def main():
     """Run all monitoring checks."""

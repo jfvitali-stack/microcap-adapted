@@ -1,5 +1,5 @@
 {
-  "date": "2025-09-13",
+  "date": "2025-09-14",
   "cash": "4.03",
   "total_value": "1140.18",
   "prices": {
@@ -44,9 +44,9 @@
         "value_change": 0.0
       },
       "MYOMO": {
-        "price_change": 0.02190000000000003,
-        "price_change_pct": 2.6642335766423395,
-        "value_change": 7.665000000000011
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "CABA": {
         "price_change": 0.0,
@@ -55,8 +55,8 @@
       }
     },
     "portfolio": {
-      "total_change": 7.664999999999964,
-      "total_change_pct": 0.6768092395719248
+      "total_change": 0.004999999999881766,
+      "total_change_pct": 0.0004385272500729504
     }
   },
   "claude_decisions_executed": false

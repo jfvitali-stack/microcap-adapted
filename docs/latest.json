@@ -1,15 +1,15 @@
 {
-  "date": "2025-09-14",
+  "date": "2025-09-15",
   "cash": "4.03",
-  "total_value": "1140.18",
+  "total_value": "1163.68",
   "prices": {
     "GEVO": 1.67,
-    "FEIM": 27.13,
-    "ARQ": 7.17,
-    "UPXI": 6.755,
-    "SERV": 12.13,
-    "MYOMO": 0.8439,
-    "CABA": 1.84
+    "FEIM": 28.005,
+    "ARQ": 7.4,
+    "UPXI": 6.33,
+    "SERV": 12.21,
+    "MYOMO": 0.8681,
+    "CABA": 1.91
   },
   "quantities": {
     "ARQ": 37,
@@ -19,44 +19,44 @@
     "CABA": 112
   },
   "values": {
-    "ARQ": "265.29",
-    "UPXI": "54.04",
-    "SERV": "315.38",
-    "MYOMO": "295.37",
-    "CABA": "206.08"
+    "ARQ": "273.80",
+    "UPXI": "50.64",
+    "SERV": "317.46",
+    "MYOMO": "303.83",
+    "CABA": "213.92"
   },
   "actions": "No trades executed",
   "daily_changes": {
     "individual": {
       "ARQ": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": 0.23000000000000043,
+        "price_change_pct": 3.2078103207810384,
+        "value_change": 8.510000000000016
       },
       "UPXI": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": -0.4249999999999998,
+        "price_change_pct": -6.291635825314579,
+        "value_change": -3.3999999999999986
       },
       "SERV": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": 0.08000000000000007,
+        "price_change_pct": 0.6595218466611712,
+        "value_change": 2.080000000000002
       },
       "MYOMO": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": 0.0242,
+        "price_change_pct": 2.867638345775566,
+        "value_change": 8.469999999999999
       },
       "CABA": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": 0.06999999999999984,
+        "price_change_pct": 3.8043478260869477,
+        "value_change": 7.839999999999982
       }
     },
     "portfolio": {
-      "total_change": 0.004999999999881766,
-      "total_change_pct": 0.0004385272500729504
+      "total_change": 23.50499999999988,
+      "total_change_pct": 2.0615166026416776
     }
   },
   "claude_decisions_executed": false

@@ -1,5 +1,5 @@
 {
-  "date": "2025-09-27",
+  "date": "2025-09-28",
   "cash": "4.03",
   "total_value": "1204.55",
   "prices": {
@@ -39,9 +39,9 @@
         "value_change": 0.0
       },
       "SERV": {
-        "price_change": -0.3200000000000003,
-        "price_change_pct": -2.6666666666666687,
-        "value_change": -8.320000000000007
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "MYOMO": {
         "price_change": 0.0,
@@ -55,8 +55,8 @@
       }
     },
     "portfolio": {
-      "total_change": -8.315000000000055,
-      "total_change_pct": -0.6855639928434255
+      "total_change": 0.004999999999881766,
+      "total_change_pct": 0.00041509277322500235
     }
   },
   "claude_decisions_executed": false

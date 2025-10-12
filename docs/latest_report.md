@@ -1,5 +1,5 @@
 # Portfolio Report
-**As of (latest close)**: 2025-10-11
+**As of (latest close)**: 2025-10-12
 
 - ARQ: close 6.7300, qty 37, value $249.01
 - UPXI: close 6.3500, qty 8, value $50.80

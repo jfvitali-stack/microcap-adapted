@@ -1,95 +1,95 @@
 {
   "date": "2025-10-17",
-  "timestamp": "2025-10-17T20:34:48.867376+00:00",
+  "timestamp": "2025-10-18T20:32:48.253996+00:00",
   "megacaps": {
     "AAPL": {
       "price": 252.29,
       "daily_change": 1.96,
-      "volume": 47982990
+      "volume": 48876500
     },
     "MSFT": {
       "price": 513.58,
       "daily_change": 0.39,
-      "volume": 19205931
+      "volume": 19798500
     },
     "GOOGL": {
       "price": 253.3,
       "daily_change": 0.73,
-      "volume": 29243564
+      "volume": 29586100
     },
     "AMZN": {
       "price": 213.04,
       "daily_change": -0.67,
-      "volume": 43119976
+      "volume": 45877900
     },
     "NVDA": {
       "price": 183.22,
       "daily_change": 0.78,
-      "volume": 170079787
+      "volume": 172692400
     },
     "TSLA": {
       "price": 439.31,
       "daily_change": 2.46,
-      "volume": 87848438
+      "volume": 89118900
     },
     "META": {
-      "price": 716.91,
+      "price": 716.92,
       "daily_change": 0.68,
-      "volume": 12034603
+      "volume": 12206800
     },
     "BRK-B": {
       "price": 492.42,
       "daily_change": 0.74,
-      "volume": 2966214
+      "volume": 3784700
     }
   },
   "indices": {
     "SPY": {
       "price": 664.39,
       "daily_change": 0.57,
-      "volume": 86060473
+      "volume": 96386200
     },
     "QQQ": {
       "price": 603.93,
       "daily_change": 0.66,
-      "volume": 69102906
+      "volume": 71911200
     },
     "IWM": {
       "price": 243.41,
       "daily_change": -0.67,
-      "volume": 53737023
+      "volume": 55349700
     },
     "VTI": {
       "price": 327.3,
       "daily_change": 0.47,
-      "volume": 5643727
+      "volume": 5646200
     }
   },
   "sectors": {
     "XLK": {
       "price": 285.01,
       "daily_change": 0.18,
-      "volume": 12663398
+      "volume": 12754900
     },
     "XLF": {
       "price": 52.18,
       "daily_change": 0.81,
-      "volume": 52056638
+      "volume": 52285400
     },
     "XLE": {
       "price": 85.98,
       "daily_change": 0.82,
-      "volume": 11858455
+      "volume": 12035900
     },
     "XLV": {
       "price": 143.27,
       "daily_change": 0.67,
-      "volume": 8141474
+      "volume": 8159500
     },
     "XLI": {
       "price": 151.73,
       "daily_change": 0.09,
-      "volume": 10662045
+      "volume": 10806300
     }
   },
   "market_mood": "NEUTRAL",

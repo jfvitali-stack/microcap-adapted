@@ -1,6 +1,6 @@
 {
   "date": "2025-10-24",
-  "timestamp": "2025-10-25T20:33:41.890227+00:00",
+  "timestamp": "2025-10-26T20:34:15.233508+00:00",
   "megacaps": {
     "AAPL": {
       "price": 262.82,
@@ -67,9 +67,9 @@
   },
   "sectors": {
     "XLK": {
-      "price": NaN,
-      "daily_change": NaN,
-      "volume": 0
+      "price": 293.58,
+      "daily_change": 1.55,
+      "volume": 7179000
     },
     "XLF": {
       "price": 53.11,

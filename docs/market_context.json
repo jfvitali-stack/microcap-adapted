@@ -1,6 +1,6 @@
 {
   "date": "2025-10-31",
-  "timestamp": "2025-11-01T20:31:44.345757+00:00",
+  "timestamp": "2025-11-02T20:32:23.913353+00:00",
   "megacaps": {
     "AAPL": {
       "price": 270.37,
@@ -82,9 +82,9 @@
       "volume": 13492100
     },
     "XLV": {
-      "price": NaN,
-      "daily_change": NaN,
-      "volume": 0
+      "price": 144.25,
+      "daily_change": -0.03,
+      "volume": 10581100
     },
     "XLI": {
       "price": 155.06,

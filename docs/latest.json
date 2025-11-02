@@ -1,5 +1,5 @@
 {
-  "date": "2025-11-01",
+  "date": "2025-11-02",
   "cash": "4.03",
   "total_value": "1357.87",
   "prices": {
@@ -29,9 +29,9 @@
   "daily_changes": {
     "individual": {
       "ARQ": {
-        "price_change": -0.040000000000000036,
-        "price_change_pct": -0.5988023952095813,
-        "value_change": -1.4800000000000013
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "UPXI": {
         "price_change": 0.0,
@@ -44,9 +44,9 @@
         "value_change": 0.0
       },
       "MYOMO": {
-        "price_change": 0.007099999999999995,
-        "price_change_pct": 0.772662966590488,
-        "value_change": 2.4849999999999985
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "CABA": {
         "price_change": 0.0,
@@ -55,8 +55,8 @@
       }
     },
     "portfolio": {
-      "total_change": 1.009999999999991,
-      "total_change_pct": 0.07443656677918069
+      "total_change": 0.0,
+      "total_change_pct": 0.0
     }
   },
   "claude_decisions_executed": false

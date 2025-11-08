@@ -1,9 +1,97 @@
 {
   "date": "2025-11-07",
-  "timestamp": "2025-11-07T20:32:57.335777+00:00",
-  "megacaps": {},
-  "indices": {},
-  "sectors": {},
+  "timestamp": "2025-11-08T20:32:15.585990+00:00",
+  "megacaps": {
+    "AAPL": {
+      "price": 268.47,
+      "daily_change": -0.48,
+      "volume": 48203600
+    },
+    "MSFT": {
+      "price": 496.82,
+      "daily_change": -0.06,
+      "volume": 23980600
+    },
+    "GOOGL": {
+      "price": 278.83,
+      "daily_change": -2.08,
+      "volume": 34440600
+    },
+    "AMZN": {
+      "price": 244.41,
+      "daily_change": 0.56,
+      "volume": 46294900
+    },
+    "NVDA": {
+      "price": 188.15,
+      "daily_change": 0.04,
+      "volume": 264204000
+    },
+    "TSLA": {
+      "price": 429.52,
+      "daily_change": -3.68,
+      "volume": 103091100
+    },
+    "META": {
+      "price": 621.71,
+      "daily_change": 0.45,
+      "volume": 29868200
+    },
+    "BRK-B": {
+      "price": 499.06,
+      "daily_change": 1.2,
+      "volume": 6370900
+    }
+  },
+  "indices": {
+    "SPY": {
+      "price": 670.97,
+      "daily_change": 0.1,
+      "volume": 100516700
+    },
+    "QQQ": {
+      "price": 609.74,
+      "daily_change": -0.32,
+      "volume": 81702200
+    },
+    "IWM": {
+      "price": 241.61,
+      "daily_change": 0.52,
+      "volume": 54929000
+    },
+    "VTI": {
+      "price": 330.09,
+      "daily_change": 0.22,
+      "volume": 4704200
+    }
+  },
+  "sectors": {
+    "XLK": {
+      "price": 288.16,
+      "daily_change": -0.35,
+      "volume": 12771900
+    },
+    "XLF": {
+      "price": 52.78,
+      "daily_change": 0.71,
+      "volume": 46213600
+    },
+    "XLE": {
+      "price": 89.54,
+      "daily_change": 1.44,
+      "volume": 17725000
+    },
+    "XLV": {
+      "price": 146.14,
+      "daily_change": 0.14,
+      "volume": 14522300
+    },
+    "XLI": {
+      "price": 153.33,
+      "daily_change": 0.48,
+      "volume": 13518600
+    }
+  },
   "market_mood": "NEUTRAL",
   "small_vs_large_cap": "NEUTRAL"
 }

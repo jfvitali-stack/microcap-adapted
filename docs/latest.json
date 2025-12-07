@@ -1,5 +1,5 @@
 {
-  "date": "2025-12-06",
+  "date": "2025-12-07",
   "cash": "4.03",
   "total_value": "1163.32",
   "prices": {
@@ -29,34 +29,34 @@
   "daily_changes": {
     "individual": {
       "ARQ": {
-        "price_change": -0.06999999999999984,
-        "price_change_pct": -1.8229166666666625,
-        "value_change": -2.589999999999994
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "UPXI": {
-        "price_change": -0.18999999999999995,
-        "price_change_pct": -6.666666666666665,
-        "value_change": -1.5199999999999996
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "SERV": {
-        "price_change": 0.41999999999999993,
-        "price_change_pct": 3.23076923076923,
-        "value_change": 10.919999999999998
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "MYOMO": {
-        "price_change": 0.020000000000000018,
-        "price_change_pct": 1.960784313725492,
-        "value_change": 7.000000000000006
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "CABA": {
-        "price_change": -0.010000000000000231,
-        "price_change_pct": -0.390625000000009,
-        "value_change": -1.1200000000000259
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       }
     },
     "portfolio": {
-      "total_change": 12.689999999999827,
-      "total_change_pct": 1.1028740776791695
+      "total_change": 0.0,
+      "total_change_pct": 0.0
     }
   },
   "claude_decisions_executed": false

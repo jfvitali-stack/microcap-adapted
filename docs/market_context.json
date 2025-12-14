@@ -1,16 +1,16 @@
 {
   "date": "2025-12-12",
-  "timestamp": "2025-12-13T20:36:15.776837+00:00",
+  "timestamp": "2025-12-14T20:36:51.878825+00:00",
   "megacaps": {
     "AAPL": {
       "price": 278.28,
       "daily_change": 0.09,
-      "volume": 38360082
+      "volume": 39532887
     },
     "MSFT": {
       "price": 478.53,
       "daily_change": -1.02,
-      "volume": 20743536
+      "volume": 21248102
     },
     "GOOGL": {
       "price": 309.29,
@@ -47,7 +47,7 @@
     "SPY": {
       "price": 681.76,
       "daily_change": -1.08,
-      "volume": 110875537
+      "volume": 105824458
     },
     "QQQ": {
       "price": 613.62,
@@ -57,7 +57,7 @@
     "IWM": {
       "price": 253.85,
       "daily_change": -1.53,
-      "volume": 57442884
+      "volume": 54930864
     },
     "VTI": {
       "price": 335.99,
@@ -74,12 +74,12 @@
     "XLF": {
       "price": 54.95,
       "daily_change": 0.15,
-      "volume": 63823329
+      "volume": 63755795
     },
     "XLE": {
       "price": 45.51,
       "daily_change": -0.98,
-      "volume": 33080262
+      "volume": 31419712
     },
     "XLV": {
       "price": 154.06,

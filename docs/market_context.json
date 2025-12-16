@@ -1,9 +1,97 @@
 {
-  "date": "2025-12-15",
-  "timestamp": "2025-12-15T20:41:55.030069+00:00",
-  "megacaps": {},
-  "indices": {},
-  "sectors": {},
+  "date": "2025-12-16",
+  "timestamp": "2025-12-16T20:41:22.934237+00:00",
+  "megacaps": {
+    "AAPL": {
+      "price": 275.08,
+      "daily_change": 0.35,
+      "volume": 22108897
+    },
+    "MSFT": {
+      "price": 476.32,
+      "daily_change": 0.32,
+      "volume": 11891216
+    },
+    "GOOGL": {
+      "price": 306.11,
+      "daily_change": -0.69,
+      "volume": 19795830
+    },
+    "AMZN": {
+      "price": 222.99,
+      "daily_change": 0.2,
+      "volume": 23560883
+    },
+    "NVDA": {
+      "price": 177.86,
+      "daily_change": 0.89,
+      "volume": 112775106
+    },
+    "TSLA": {
+      "price": NaN,
+      "daily_change": NaN,
+      "volume": 0
+    },
+    "META": {
+      "price": 660.96,
+      "daily_change": 2.08,
+      "volume": 8973905
+    },
+    "BRK-B": {
+      "price": 502.03,
+      "daily_change": -0.86,
+      "volume": 2643045
+    }
+  },
+  "indices": {
+    "SPY": {
+      "price": 679.91,
+      "daily_change": -0.12,
+      "volume": 77357024
+    },
+    "QQQ": {
+      "price": 612.76,
+      "daily_change": 0.36,
+      "volume": 46520949
+    },
+    "IWM": {
+      "price": 250.29,
+      "daily_change": -0.65,
+      "volume": 33969204
+    },
+    "VTI": {
+      "price": 334.81,
+      "daily_change": -0.16,
+      "volume": 3593423
+    }
+  },
+  "sectors": {
+    "XLK": {
+      "price": 142.79,
+      "daily_change": 0.35,
+      "volume": 8750524
+    },
+    "XLF": {
+      "price": 54.74,
+      "daily_change": -0.46,
+      "volume": 29617526
+    },
+    "XLE": {
+      "price": 43.9,
+      "daily_change": -2.84,
+      "volume": 37414041
+    },
+    "XLV": {
+      "price": 153.95,
+      "daily_change": -1.38,
+      "volume": 10625177
+    },
+    "XLI": {
+      "price": 156.22,
+      "daily_change": -0.49,
+      "volume": 8946119
+    }
+  },
   "market_mood": "NEUTRAL",
-  "small_vs_large_cap": "NEUTRAL"
+  "small_vs_large_cap": "LARGE_CAPS_OUTPERFORMING"
 }

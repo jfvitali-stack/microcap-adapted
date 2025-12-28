@@ -1,5 +1,5 @@
 {
-  "date": "2025-12-27",
+  "date": "2025-12-28",
   "cash": "4.03",
   "total_value": "1187.80",
   "prices": {
@@ -49,14 +49,14 @@
         "value_change": 0.0
       },
       "CABA": {
-        "price_change": -0.5699999999999998,
-        "price_change_pct": -26.027397260273965,
-        "value_change": -63.83999999999998
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       }
     },
     "portfolio": {
-      "total_change": -63.840000000000146,
-      "total_change_pct": -5.100508133329083
+      "total_change": 0.0,
+      "total_change_pct": 0.0
     }
   },
   "claude_decisions_executed": false

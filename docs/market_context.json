@@ -1,95 +1,95 @@
 {
-  "date": "2025-12-30",
-  "timestamp": "2025-12-30T20:40:29.547452+00:00",
+  "date": "2025-12-31",
+  "timestamp": "2025-12-31T20:38:57.859564+00:00",
   "megacaps": {
     "AAPL": {
-      "price": 273.16,
-      "daily_change": -0.22,
-      "volume": 13914057
+      "price": 272.51,
+      "daily_change": -0.21,
+      "volume": 13555626
     },
     "MSFT": {
-      "price": 488.27,
-      "daily_change": 0.24,
-      "volume": 8500659
+      "price": 483.9,
+      "daily_change": -0.73,
+      "volume": 7157834
     },
     "GOOGL": {
-      "price": 314.42,
-      "daily_change": 0.27,
-      "volume": 12623360
+      "price": 312.86,
+      "daily_change": -0.32,
+      "volume": 9616372
     },
     "AMZN": {
-      "price": 231.98,
-      "daily_change": -0.04,
-      "volume": 14907172
+      "price": 231.05,
+      "daily_change": -0.64,
+      "volume": 14358301
     },
     "NVDA": {
-      "price": 187.65,
-      "daily_change": -0.3,
-      "volume": 77904190
+      "price": 187.31,
+      "daily_change": -0.12,
+      "volume": 88526439
     },
     "TSLA": {
-      "price": 455.59,
-      "daily_change": -0.88,
-      "volume": 52612726
+      "price": 449.95,
+      "daily_change": -0.99,
+      "volume": 41664910
     },
     "META": {
-      "price": 666.8,
-      "daily_change": 1.23,
-      "volume": 7100084
+      "price": 659.96,
+      "daily_change": -0.9,
+      "volume": 5017684
     },
     "BRK-B": {
-      "price": 504.64,
-      "daily_change": 0.72,
-      "volume": 1855979
+      "price": 504.12,
+      "daily_change": 0.08,
+      "volume": 1529378
     }
   },
   "indices": {
     "SPY": {
-      "price": 687.74,
-      "daily_change": -0.02,
-      "volume": 32082021
+      "price": 683.22,
+      "daily_change": -0.55,
+      "volume": 48870008
     },
     "QQQ": {
-      "price": 620.24,
-      "daily_change": -0.1,
-      "volume": 25547387
+      "price": 615.34,
+      "daily_change": -0.66,
+      "volume": 30540968
     },
     "IWM": {
-      "price": NaN,
-      "daily_change": NaN,
-      "volume": 0
+      "price": 246.34,
+      "daily_change": -0.68,
+      "volume": 24757888
     },
     "VTI": {
-      "price": 338.28,
-      "daily_change": -0.03,
-      "volume": 2949546
+      "price": 335.92,
+      "daily_change": -0.57,
+      "volume": 2930491
     }
   },
   "sectors": {
     "XLK": {
-      "price": 145.62,
-      "daily_change": -0.17,
-      "volume": 4991155
+      "price": 144.26,
+      "daily_change": -0.79,
+      "volume": 6595856
     },
     "XLF": {
-      "price": 55.24,
-      "daily_change": -0.14,
-      "volume": 13191908
+      "price": 54.93,
+      "daily_change": -0.45,
+      "volume": 16043462
     },
     "XLE": {
-      "price": 45.06,
-      "daily_change": 1.0,
-      "volume": 15225241
+      "price": 44.73,
+      "daily_change": -0.51,
+      "volume": 12494469
     },
     "XLV": {
-      "price": 155.93,
-      "daily_change": 0.08,
-      "volume": 3358659
+      "price": 155.15,
+      "daily_change": -0.34,
+      "volume": 3224373
     },
     "XLI": {
-      "price": 156.73,
-      "daily_change": -0.09,
-      "volume": 2908656
+      "price": 155.47,
+      "daily_change": -0.61,
+      "volume": 2638089
     }
   },
   "market_mood": "NEUTRAL",

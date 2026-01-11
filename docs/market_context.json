@@ -1,6 +1,6 @@
 {
   "date": "2026-01-09",
-  "timestamp": "2026-01-10T20:38:32.053462+00:00",
+  "timestamp": "2026-01-11T20:39:28.047226+00:00",
   "megacaps": {
     "AAPL": {
       "price": 259.37,
@@ -55,9 +55,9 @@
       "volume": 49622600
     },
     "IWM": {
-      "price": NaN,
-      "daily_change": NaN,
-      "volume": 0
+      "price": 260.23,
+      "daily_change": 0.76,
+      "volume": 36288900
     },
     "VTI": {
       "price": 342.4,

@@ -1,10 +1,10 @@
 {
-  "date": "2026-03-10",
+  "date": "2026-03-11",
   "cash": "4.03",
   "total_value": "1187.80",
   "prices": {
     "GEVO": 2.3,
-    "FEIM": 54.15,
+    "FEIM": 29.01,
     "ARQ": 7.39,
     "UPXI": 7.93,
     "SERV": 9.71,
@@ -49,14 +49,14 @@
         "value_change": 0.0
       },
       "CABA": {
-        "price_change": -1.65,
-        "price_change_pct": -50.45871559633027,
-        "value_change": -184.79999999999998
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       }
     },
     "portfolio": {
-      "total_change": -184.79999999999995,
-      "total_change_pct": -13.46349992714556
+      "total_change": 0.0,
+      "total_change_pct": 0.0
     }
   },
   "claude_decisions_executed": false

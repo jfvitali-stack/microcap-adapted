@@ -1,41 +1,41 @@
 {
   "date": "2026-03-20",
-  "timestamp": "2026-03-21T20:45:24.484160+00:00",
+  "timestamp": "2026-03-22T20:46:32.694160+00:00",
   "megacaps": {
     "AAPL": {
       "price": 247.99,
       "daily_change": -0.39,
-      "volume": 87981315
+      "volume": 88331081
     },
     "MSFT": {
-      "price": 381.87,
+      "price": 381.85,
       "daily_change": -1.84,
-      "volume": 46929374
+      "volume": 50853154
     },
     "GOOGL": {
       "price": 301.0,
       "daily_change": -2.0,
-      "volume": 44234237
+      "volume": 44364079
     },
     "AMZN": {
       "price": 205.37,
       "daily_change": -1.62,
-      "volume": 55381136
+      "volume": 63694603
     },
     "NVDA": {
-      "price": 172.7,
-      "daily_change": -3.28,
-      "volume": 209815684
+      "price": 172.93,
+      "daily_change": -3.15,
+      "volume": 241323528
     },
     "TSLA": {
       "price": 367.96,
       "daily_change": -3.24,
-      "volume": 74680129
+      "volume": 78628603
     },
     "META": {
       "price": 593.66,
       "daily_change": -2.15,
-      "volume": 19820750
+      "volume": 21214898
     },
     "BRK-B": {
       "price": 480.94,
@@ -52,7 +52,7 @@
     "QQQ": {
       "price": 582.06,
       "daily_change": -1.85,
-      "volume": 89087904
+      "volume": 91964677
     },
     "IWM": {
       "price": 242.22,

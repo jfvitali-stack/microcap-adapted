@@ -1,97 +1,97 @@
 {
   "date": "2026-06-18",
-  "timestamp": "2026-06-18T22:26:38.353458+00:00",
+  "timestamp": "2026-06-19T21:37:33.089114+00:00",
   "megacaps": {
     "AAPL": {
       "price": 298.01,
       "daily_change": 0.7,
-      "volume": 76701676
+      "volume": 85962200
     },
     "MSFT": {
       "price": 379.4,
       "daily_change": 0.13,
-      "volume": 58466440
+      "volume": 59714200
     },
     "GOOGL": {
       "price": 368.03,
       "daily_change": 1.17,
-      "volume": 44359380
+      "volume": 44470100
     },
     "AMZN": {
       "price": 244.39,
       "daily_change": 2.9,
-      "volume": 66532506
+      "volume": 75624400
     },
     "NVDA": {
-      "price": 210.69,
-      "daily_change": 2.95,
-      "volume": 238264530
+      "price": NaN,
+      "daily_change": NaN,
+      "volume": 0
     },
     "TSLA": {
       "price": 400.49,
       "daily_change": 1.04,
-      "volume": 54706416
+      "volume": 58384700
     },
     "META": {
       "price": 577.22,
       "daily_change": 1.7,
-      "volume": 26843593
+      "volume": 28824600
     },
     "BRK-B": {
       "price": 489.46,
       "daily_change": -0.37,
-      "volume": 6023238
+      "volume": 8882300
     }
   },
   "indices": {
     "SPY": {
       "price": 746.74,
-      "daily_change": 0.78,
-      "volume": 67865619
+      "daily_change": 1.04,
+      "volume": 80875700
     },
     "QQQ": {
       "price": 740.62,
       "daily_change": 2.51,
-      "volume": 49291407
+      "volume": 50154600
     },
     "IWM": {
       "price": 295.59,
       "daily_change": 1.97,
-      "volume": 32132338
+      "volume": 32463200
     },
     "VTI": {
       "price": 369.99,
       "daily_change": 1.16,
-      "volume": 2752372
+      "volume": 3413600
     }
   },
   "sectors": {
     "XLK": {
       "price": 191.44,
       "daily_change": 3.04,
-      "volume": 12003212
+      "volume": 12101600
     },
     "XLF": {
       "price": 53.57,
       "daily_change": -0.89,
-      "volume": 37399585
+      "volume": 37816800
     },
     "XLE": {
       "price": 53.77,
       "daily_change": -1.65,
-      "volume": 39290330
+      "volume": 39645700
     },
     "XLV": {
       "price": 149.4,
       "daily_change": -0.87,
-      "volume": 10860488
+      "volume": 10879300
     },
     "XLI": {
       "price": 180.91,
       "daily_change": 0.73,
-      "volume": 8057410
+      "volume": 8059200
     }
   },
-  "market_mood": "BULLISH",
+  "market_mood": "NEUTRAL",
   "small_vs_large_cap": "SMALL_CAPS_OUTPERFORMING"
 }

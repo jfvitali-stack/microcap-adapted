@@ -1,6 +1,6 @@
 {
   "date": "2026-06-18",
-  "timestamp": "2026-06-19T21:37:33.089114+00:00",
+  "timestamp": "2026-06-20T21:42:07.058097+00:00",
   "megacaps": {
     "AAPL": {
       "price": 298.01,
@@ -23,9 +23,9 @@
       "volume": 75624400
     },
     "NVDA": {
-      "price": NaN,
-      "daily_change": NaN,
-      "volume": 0
+      "price": 210.69,
+      "daily_change": 2.95,
+      "volume": 241272000
     },
     "TSLA": {
       "price": 400.49,
@@ -92,6 +92,6 @@
       "volume": 8059200
     }
   },
-  "market_mood": "NEUTRAL",
+  "market_mood": "BULLISH",
   "small_vs_large_cap": "SMALL_CAPS_OUTPERFORMING"
 }

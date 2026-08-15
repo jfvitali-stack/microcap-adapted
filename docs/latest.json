@@ -1,12 +1,12 @@
 {
-  "date": "2026-08-14",
+  "date": "2026-08-15",
   "cash": "4.03",
-  "total_value": "1314.36",
+  "total_value": "1256.90",
   "prices": {
     "GEVO": 1.69,
     "FEIM": 29.01,
     "ARQ": 7.39,
-    "UPXI": 7.93,
+    "UPXI": 0.7475,
     "SERV": 9.71,
     "MYOMO": 1.18,
     "CABA": 2.75
@@ -20,7 +20,7 @@
   },
   "values": {
     "ARQ": "273.43",
-    "UPXI": "63.44",
+    "UPXI": "5.98",
     "SERV": "252.46",
     "MYOMO": "413.00",
     "CABA": "308.00"
@@ -34,9 +34,9 @@
         "value_change": 0.0
       },
       "UPXI": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": -7.182499999999999,
+        "price_change_pct": -90.57377049180327,
+        "value_change": -57.459999999999994
       },
       "SERV": {
         "price_change": 0.0,
@@ -49,14 +49,14 @@
         "value_change": 0.0
       },
       "CABA": {
-        "price_change": 1.13,
-        "price_change_pct": 69.75308641975307,
-        "value_change": 126.55999999999999
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       }
     },
     "portfolio": {
-      "total_change": 126.55999999999995,
-      "total_change_pct": 10.654992422966824
+      "total_change": -57.460000000000036,
+      "total_change_pct": -4.371709425119453
     }
   },
   "claude_decisions_executed": false

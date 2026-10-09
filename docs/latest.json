@@ -1,15 +1,15 @@
 {
-  "date": "2026-10-08",
+  "date": "2026-10-09",
   "cash": "4.03",
-  "total_value": "1227.00",
+  "total_value": "1169.96",
   "prices": {
-    "GEVO": 1.3,
+    "GEVO": 1.35,
     "FEIM": 29.01,
     "ARQ": 7.39,
-    "UPXI": 7.93,
+    "UPXI": 1.08,
     "SERV": 9.71,
     "MYOMO": 1.18,
-    "CABA": 1.97
+    "CABA": 1.95
   },
   "quantities": {
     "ARQ": 37,
@@ -20,10 +20,10 @@
   },
   "values": {
     "ARQ": "273.43",
-    "UPXI": "63.44",
+    "UPXI": "8.64",
     "SERV": "252.46",
     "MYOMO": "413.00",
-    "CABA": "220.64"
+    "CABA": "218.40"
   },
   "actions": "No trades executed",
   "daily_changes": {
@@ -34,9 +34,9 @@
         "value_change": 0.0
       },
       "UPXI": {
-        "price_change": 0.0,
-        "price_change_pct": 0.0,
-        "value_change": 0.0
+        "price_change": -6.85,
+        "price_change_pct": -86.38083228247162,
+        "value_change": -54.8
       },
       "SERV": {
         "price_change": 0.0,
@@ -49,14 +49,14 @@
         "value_change": 0.0
       },
       "CABA": {
-        "price_change": 0.34999999999999987,
-        "price_change_pct": 21.60493827160493,
-        "value_change": 39.19999999999999
+        "price_change": -0.020000000000000018,
+        "price_change_pct": -1.0152284263959401,
+        "value_change": -2.240000000000002
       }
     },
     "portfolio": {
-      "total_change": 39.200000000000045,
-      "total_change_pct": 3.300218892069376
+      "total_change": -57.039999999999964,
+      "total_change_pct": -4.648736756316215
     }
   },
   "claude_decisions_executed": false

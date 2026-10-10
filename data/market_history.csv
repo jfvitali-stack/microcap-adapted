@@ -416,3 +416,4 @@ date,market_mood,small_vs_large_cap,AAPL_price,AAPL_change,MSFT_price,MSFT_chang
 2026-10-07,NEUTRAL,NEUTRAL,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan
 2026-10-08,NEUTRAL,NEUTRAL,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan
 2026-10-09,NEUTRAL,NEUTRAL,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan
+2026-10-09,NEUTRAL,NEUTRAL,336.64,-1.11,535.07,2.38,351.66,0.97,262.43,3.29,229.28,-0.52,382.7,2.05,718.67,-0.31,515.62,0.89,778.57,0.6,751.27,0.49,278.94,0.49,381.94,0.63,198.78,0.51,54.73,0.92,65.08,-0.25,170.81,1.58,169.25,0.5

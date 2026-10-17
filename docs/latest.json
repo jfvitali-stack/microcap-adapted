@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16",
+  "date": "2026-10-17",
   "cash": "4.03",
   "total_value": "1187.80",
   "prices": {
@@ -34,9 +34,9 @@
         "value_change": 0.0
       },
       "UPXI": {
-        "price_change": 6.869999999999999,
-        "price_change_pct": 648.1132075471697,
-        "value_change": 54.959999999999994
+        "price_change": 0.0,
+        "price_change_pct": 0.0,
+        "value_change": 0.0
       },
       "SERV": {
         "price_change": 0.0,
@@ -55,8 +55,8 @@
       }
     },
     "portfolio": {
-      "total_change": 54.960000000000036,
-      "total_change_pct": 4.851523604392504
+      "total_change": 0.0,
+      "total_change_pct": 0.0
     }
   },
   "claude_decisions_executed": false

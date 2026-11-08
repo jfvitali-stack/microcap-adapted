@@ -1,6 +1,6 @@
 {
   "date": "2026-11-06",
-  "timestamp": "2026-11-07T23:40:25.956432+00:00",
+  "timestamp": "2026-11-08T23:47:35.739038+00:00",
   "megacaps": {
     "AAPL": {
       "price": 342.37,
@@ -8,9 +8,9 @@
       "volume": 44676300
     },
     "MSFT": {
-      "price": 530.61,
-      "daily_change": -0.99,
-      "volume": 26938400
+      "price": NaN,
+      "daily_change": NaN,
+      "volume": 0
     },
     "GOOGL": {
       "price": 284.78,

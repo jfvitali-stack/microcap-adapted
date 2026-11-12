@@ -1,15 +1,15 @@
 {
-  "date": "2026-11-11",
+  "date": "2026-11-12",
   "cash": "4.03",
-  "total_value": "1168.76",
+  "total_value": "1187.80",
   "prices": {
-    "GEVO": 1.39,
+    "GEVO": 1.82,
     "FEIM": 29.01,
     "ARQ": 7.39,
     "UPXI": 7.93,
     "SERV": 9.71,
     "MYOMO": 1.18,
-    "CABA": 1.45
+    "CABA": 1.62
   },
   "quantities": {
     "ARQ": 37,
@@ -23,7 +23,7 @@
     "UPXI": "63.44",
     "SERV": "252.46",
     "MYOMO": "413.00",
-    "CABA": "162.40"
+    "CABA": "181.44"
   },
   "actions": "No trades executed",
   "daily_changes": {
@@ -49,14 +49,14 @@
         "value_change": 0.0
       },
       "CABA": {
-        "price_change": -0.17000000000000015,
-        "price_change_pct": -10.493827160493836,
-        "value_change": -19.040000000000017
+        "price_change": 0.17000000000000015,
+        "price_change_pct": 11.724137931034493,
+        "value_change": 19.040000000000017
       }
     },
     "portfolio": {
-      "total_change": -19.039999999999964,
-      "total_change_pct": -1.6029634618622632
+      "total_change": 19.039999999999964,
+      "total_change_pct": 1.6290769704644208
     }
   },
   "claude_decisions_executed": false

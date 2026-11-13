@@ -1,95 +1,95 @@
 {
-  "date": "2026-11-11",
-  "timestamp": "2026-11-12T01:55:46.501167+00:00",
+  "date": "2026-11-12",
+  "timestamp": "2026-11-13T01:11:33.078741+00:00",
   "megacaps": {
     "AAPL": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 34023762
+      "volume": 30897281
     },
     "MSFT": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 28565538
+      "volume": 17899545
     },
     "GOOGL": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 24971153
+      "volume": 35166591
     },
     "AMZN": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 37223624
+      "volume": 33764492
     },
     "NVDA": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 281514030
+      "volume": 740019481
     },
     "TSLA": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 27590811
+      "volume": 28830920
     },
     "META": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 15429277
+      "volume": 10253879
     },
     "BRK-B": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 5091790
+      "volume": 5525036
     }
   },
   "indices": {
     "SPY": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 37707134
+      "volume": 37043281
     },
     "QQQ": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 42821615
+      "volume": 36073858
     },
     "IWM": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 17370168
+      "volume": 22572446
     },
     "VTI": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 2615913
+      "volume": 3034959
     }
   },
   "sectors": {
     "XLK": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 14848634
+      "volume": 9693263
     },
     "XLF": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 25181563
+      "volume": 21981255
     },
     "XLE": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 24315031
+      "volume": 25927227
     },
     "XLV": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 8254973
+      "volume": 7772094
     },
     "XLI": {
       "price": NaN,
       "daily_change": NaN,
-      "volume": 6736392
+      "volume": 6402923
     }
   },
   "market_mood": "NEUTRAL",

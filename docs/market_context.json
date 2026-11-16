@@ -1,6 +1,6 @@
 {
   "date": "2026-11-13",
-  "timestamp": "2026-11-14T23:58:31.816548+00:00",
+  "timestamp": "2026-11-16T00:00:06.266274+00:00",
   "megacaps": {
     "AAPL": {
       "price": 356.27,
@@ -38,9 +38,9 @@
       "volume": 15127500
     },
     "BRK-B": {
-      "price": 592.94,
-      "daily_change": 0.53,
-      "volume": 4765400
+      "price": NaN,
+      "daily_change": NaN,
+      "volume": 0
     }
   },
   "indices": {
